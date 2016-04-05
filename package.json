@@ -10,6 +10,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "botkit": "0.0.15"
+    "botkit": "0.0.15",
+    "node-wit": "^2.0.0"
   }
 }
