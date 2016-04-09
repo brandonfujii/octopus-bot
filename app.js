@@ -5,9 +5,6 @@ var firebase_storage = require(__dirname + '/database/storage')({
     firebase_uri: 'https://nuvention.firebaseio.com'
 });
 
-testObj0 = {id: 'TEST0', foo: 'bar0'};
-testObj1 = {id: 'TEST1', foo: 'bar1'};
-
 // Intialize botkit controller
 var controller = Botkit.slackbot();
 
@@ -23,11 +20,37 @@ bot.startRTM(function(err, bot, payload) {
   }
 });
 
+// Task Object Constructor
+function Task(id, body, author) {
+	this.id = id;
+	this.body = body;
+	this.author = author;
+}
+
+// Parses command to get task user wants to interact with
+// Pattern: COMMAND [space] (TASKBODY)
+function getTaskBody( str ){
+	if (/\w+\s\([^)]+\)/g.test(str)) {
+		return str.match(/\(([^)]+)\)/)[1];
+	}
+	else {
+		return "Command not found";
+	}
+}
+
 // Bot listens for 'add' to add a task to firebase
 controller.hears('add', 'direct_message,direct_mention,mention', function(bot, message) {
-	firebase_storage.teams.save(testObj1, function(err) {
+	var command = message.text.split(" ")[0];
+	var body = getTaskBody(message.text);
+	var task_id = Date.now();
+	var task = new Task(task_id, body, message.user);
+
+	firebase_storage.teams.save(task, function(err) {
 		if (err) {
 			bot.reply(message, 'Sorry, I couldn\'t add your task!');
+		}
+		else {
+			bot.reply(message, 'Task added!');
 		}
 	})
 });
