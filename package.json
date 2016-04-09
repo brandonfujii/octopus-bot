@@ -12,6 +12,7 @@
   "dependencies": {
     "botkit": "0.0.15",
     "dotenv": "^2.0.0",
+    "firebase": "^2.4.2",
     "node-wit": "^2.0.0"
   }
 }
