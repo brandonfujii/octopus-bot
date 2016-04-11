@@ -84,9 +84,11 @@ octopus.controller.hears('add', 'direct_message,direct_mention,mention', functio
 	})
 });
 
-// DELETE: Bot listens for 'delete' and a (task_id), then deletes
+// REMOVE/COMPLETE: Bot listens for 'remove' or 'complete' and a (task_id), then deletes
 // task with id from database
-octopus.controller.hears('delete', 'direct_message,direct_mention,mention', function(bot, message) {
+// TODO: give different responses to remove and complete
+// For example, 'Task completed!', instead of 'Task removed' on complete
+octopus.controller.hears(['remove', 'complete'], 'direct_message,direct_mention,mention', function(bot, message) {
 	var command = message.text.split(" ")[0];
 	var task_id = getTaskBody(message.text);
 
