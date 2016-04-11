@@ -51,21 +51,30 @@ module.exports = function(config) {
         };
     };
 
+     var del = function(firebaseRef) {
+        return function(id) {
+            firebaseRef.child(id).remove();
+        };
+    };
+
     var storage = {
         teams: {
             get: get(teamsRef),
             save: save(teamsRef),
-            all: all(teamsRef)
+            all: all(teamsRef),
+            del: del(teamsRef)
         },
         channels: {
             get: get(channelsRef),
             save: save(channelsRef),
-            all: all(channelsRef)
+            all: all(channelsRef),
+            del: del(channelsRef)
         },
         users: {
             get: get(usersRef),
             save: save(usersRef),
-            all: all(usersRef)
+            all: all(usersRef),
+            del: del(usersRef)
         }
     };
 

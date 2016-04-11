@@ -1,3 +1,5 @@
+// Uniquify.js: Functions for creating unique IDs for tasks
+
 // define database and botkit controller
 var octopus = require('./botconfig');
 

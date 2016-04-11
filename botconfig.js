@@ -1,3 +1,4 @@
+// BotConfig.js: Main botkit configuration/initialization file
 // use .env file
 require('dotenv').config()
 var Botkit = require('botkit');

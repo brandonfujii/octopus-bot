@@ -1,3 +1,6 @@
+// App.js: contains all Slack commands and interactions
+// with tasks
+
 // define database and botkit controller
 var octopus = require('./botconfig');
 // get unique ID functions
@@ -85,10 +88,29 @@ octopus.controller.hears('add', 'direct_message,direct_mention,mention', functio
 // task with id from database
 octopus.controller.hears('delete', 'direct_message,direct_mention,mention', function(bot, message) {
 	var command = message.text.split(" ")[0];
-	var task_id = parseInt(getTaskBody(message.text));
+	var task_id = getTaskBody(message.text);
 
-	octopus.firebase_storage.teams.get(task_id, function(err, team) {
+	octopus.firebase_storage.teams.all(function(err, data) {
+		if (err) {
+			octopus.bot.reply(message, 'Sorry, I couldn\'t access task database!');
+			return;
+		}
 
+		var exists = false;
+
+		if (data) {
+			data.map(function(task) {
+				if (task_id == task.id) {
+					// DELETE function here
+					octopus.firebase_storage.teams.del(task_id);
+					octopus.bot.reply(message, 'Task removed'); 
+					exists = true;
+				}
+			});
+			if (!exists) {
+				octopus.bot.reply(message, 'I couldn\'t find a task with that ID!');
+			}
+		}
 	})
 
 });
