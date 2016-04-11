@@ -23,11 +23,13 @@ bot.startRTM(function(err, bot, payload) {
 });
 
 // Task Object Constructor
-function Task(id, body, author, assignee) {
+function Task(id, body, author, assignee, color, hex) {
 	this.id = id;
 	this.body = body;
 	this.author = author;
 	this.assignee = assignee;
+	this.color = color;
+	this.hex = hex;
 }
 
 // Parses command to get task user wants to interact with
@@ -83,8 +85,10 @@ controller.hears('help', 'direct_message,direct_mention,mention', function(bot, 
 controller.hears('add', 'direct_message,direct_mention,mention', function(bot, message) {
 	var command = message.text.split(" ")[0];
 	var body = getTaskBody(message.text);
-	var task_id = uniquify.getUniqueID();
-	var task = new Task(task_id, body, message.user, null);
+	var id_tag = uniquify.checkDBForExistingID();
+	var task_id = id_tag.id;
+	var colorObj = id_tag.color;
+	var task = new Task(task_id, body, message.user, null, colorObj.name, colorObj.hex);
 
 	firebase_storage.teams.save(task, function(err) {
 		if (err) {
@@ -123,7 +127,7 @@ controller.hears('show tasks', 'direct_message,direct_mention,mention', function
 			data.map(function(task) {
 				var TaskItem = {
 			  	title: 'Task ' + task.id,
-			    color: uniquify.getColor(),
+			    color: '#' + task.hex,
 			    fields: [],
 			  };
 
@@ -135,8 +139,6 @@ controller.hears('show tasks', 'direct_message,direct_mention,mention', function
 
 			  attachments.push(TaskItem);
 			});
-
-
 
 			bot.reply(message,{
 		    text: 'Your Team\'s Tasks:',
