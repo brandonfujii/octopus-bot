@@ -2,8 +2,10 @@
 require('dotenv').config()
 var Botkit = require('botkit');
 var firebase_storage = require(__dirname + '/database/storage')({
-    firebase_uri: 'https://nuvention.firebaseio.com'
+    firebase_uri: process.env.FIREBASE_URI
 });
+var uniquify = require('./uniquify');
+
 
 // Intialize botkit controller
 var controller = Botkit.slackbot();
@@ -30,7 +32,7 @@ function Task(id, body, author, assignee) {
 
 // Parses command to get task user wants to interact with
 // Pattern: COMMAND [space] (TASKBODY)
-function getTaskBody( str ){
+function getTaskBody( str ) {
 	if (/\w+\s\([^)]+\)/g.test(str)) {
 		return str.match(/\(([^)]+)\)/)[1];
 	}
@@ -39,6 +41,7 @@ function getTaskBody( str ){
 	}
 }
 
+// HELP: Bot listens for 'help', then shows documentation for octopus
 controller.hears('help', 'direct_message,direct_mention,mention', function(bot, message) {
 	var attachments = [];
   var addTaskHelp = {
@@ -66,7 +69,7 @@ controller.hears('help', 'direct_message,direct_mention,mention', function(bot, 
   });
 
   attachments.push(addTaskHelp);
-  attachments.push(showTasksHelp)
+  attachments.push(showTasksHelp);
 
   bot.reply(message,{
     text: 'Here are some commands you can perform with Octopus:',
@@ -80,7 +83,7 @@ controller.hears('help', 'direct_message,direct_mention,mention', function(bot, 
 controller.hears('add', 'direct_message,direct_mention,mention', function(bot, message) {
 	var command = message.text.split(" ")[0];
 	var body = getTaskBody(message.text);
-	var task_id = Date.now();
+	var task_id = uniquify.getUniqueID();
 	var task = new Task(task_id, body, message.user, null);
 
 	firebase_storage.teams.save(task, function(err) {
@@ -93,7 +96,8 @@ controller.hears('add', 'direct_message,direct_mention,mention', function(bot, m
 	})
 });
 
-// DELETE: 
+// DELETE: Bot listens for 'delete' and a (task_id), then deletes
+// task with id from database
 controller.hears('delete', 'direct_message,direct_mention,mention', function(bot, message) {
 	var command = message.text.split(" ")[0];
 	var task_id = parseInt(getTaskBody(message.text));
@@ -114,11 +118,32 @@ controller.hears('show tasks', 'direct_message,direct_mention,mention', function
 		}
 
 		if (data) {
+			var attachments = [];
 
 			data.map(function(task) {
-				var list_item = "Task " + task.id + ": " + task.body;
-				bot.reply(message, list_item);
+				var TaskItem = {
+			  	title: 'Task ' + task.id,
+			    color: uniquify.getColor(),
+			    fields: [],
+			  };
+
+				TaskItem.fields.push({
+			    label: 'TaskItem',
+			    value: task.body,
+			    short: true,
+			  });
+
+			  attachments.push(TaskItem);
 			});
+
+
+
+			bot.reply(message,{
+		    text: 'Your Team\'s Tasks:',
+		    attachments: attachments,
+		  }, function(err,resp) {
+		    console.log(err,resp);
+		  });
 
 		}
 
