@@ -1,8 +1,7 @@
 # Octopus (in progress)
 A task management bot for Slack
 
-## Installation
-Set up a bot for your Slack: 
+## Installation 
 
 Clone this repository: 
 ```bash
@@ -27,6 +26,7 @@ When in the folder of the cloned repository, run
 ```bash
 SLACK_ACCESS_TOKEN=your_slack_access_token FIREBASE_URI=your_firebase_url node app.js
 ```
+This allows the program to know which bot to use and where to store the created tasks.
 ## Usage
 Go to the channel that you've invited your bot to. For each command you'll be mentioning your bot (@yourbot):
 #### Adding a task
