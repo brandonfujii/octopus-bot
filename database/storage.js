@@ -1,30 +1,4 @@
-/*
-Firebase storage module for bots.
-
-Note that this storage module does not specify how to authenticate to Firebase.
-There are many methods of user authentication for Firebase.
-Please read: https://www.firebase.com/docs/web/guide/user-auth.html
-
-Supports storage of data on a team-by-team, user-by-user, and chnnel-by-channel basis.
-
-save can be used to store arbitrary object.
-These objects must include an id by which they can be looked up.
-It is recommended to use the team/user/channel id for this purpose.
-Example usage of save:
-controller.storage.teams.save({id: message.team, foo:"bar"}, function(err){
-  if (err)
-    console.log(err)`
-});
-
-get looks up an object by id.
-Example usage of get:
-controller.storage.teams.get(message.team, function(err, team_data){
-  if (err)
-    console.log(err)
-  else
-    console.log(team_data)
-});
-*/
+// Firebase database for bots
 
 var Firebase = require('firebase');
 

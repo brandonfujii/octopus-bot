@@ -1,26 +1,7 @@
-// use .env file
-require('dotenv').config()
-var Botkit = require('botkit');
-var firebase_storage = require(__dirname + '/database/storage')({
-    firebase_uri: process.env.FIREBASE_URI
-});
+// define database and botkit controller
+var octopus = require('./botconfig');
+// get unique ID functions
 var uniquify = require('./uniquify');
-
-
-// Intialize botkit controller
-var controller = Botkit.slackbot();
-
-// Define a slack bot based on unique access token
-var bot = controller.spawn({
-  token: process.env.SLACK_ACCESS_TOKEN
-})
-
-// Start bot and handle error if it fails
-bot.startRTM(function(err, bot, payload) {
-  if (err) {
-    throw new Error('Could not connect to Slack');
-  }
-});
 
 // Task Object Constructor
 function Task(id, body, author, assignee, color, hex) {
@@ -44,8 +25,8 @@ function getTaskBody( str ) {
 }
 
 // HELP: Bot listens for 'help', then shows documentation for octopus
-controller.hears('help', 'direct_message,direct_mention,mention', function(bot, message) {
-	var attachments = [];
+octopus.controller.hears('help', 'direct_message,direct_mention,mention', function(bot, message) {
+  var attachments = [];
   var addTaskHelp = {
   	title: 'Adding a task:',
     color: '#FF7E82',
@@ -73,7 +54,7 @@ controller.hears('help', 'direct_message,direct_mention,mention', function(bot, 
   attachments.push(addTaskHelp);
   attachments.push(showTasksHelp);
 
-  bot.reply(message,{
+  octopus.bot.reply(message,{
     text: 'Here are some commands you can perform with Octopus:',
     attachments: attachments,
   },function(err,resp) {
@@ -82,7 +63,7 @@ controller.hears('help', 'direct_message,direct_mention,mention', function(bot, 
 });
 
 // ADD: Bot listens for 'add' to add a task to firebase
-controller.hears('add', 'direct_message,direct_mention,mention', function(bot, message) {
+octopus.controller.hears('add', 'direct_message,direct_mention,mention', function(bot, message) {
 	var command = message.text.split(" ")[0];
 	var body = getTaskBody(message.text);
 	var id_tag = uniquify.checkDBForExistingID();
@@ -90,23 +71,23 @@ controller.hears('add', 'direct_message,direct_mention,mention', function(bot, m
 	var colorObj = id_tag.color;
 	var task = new Task(task_id, body, message.user, null, colorObj.name, colorObj.hex);
 
-	firebase_storage.teams.save(task, function(err) {
+	octopus.firebase_storage.teams.save(task, function(err) {
 		if (err) {
-			bot.reply(message, 'Sorry, I couldn\'t add your task!');
+			octopus.bot.reply(message, 'Sorry, I couldn\'t add your task!');
 		}
 		else {
-			bot.reply(message, 'Task added!');
+			octopus.bot.reply(message, 'Task added!');
 		}
 	})
 });
 
 // DELETE: Bot listens for 'delete' and a (task_id), then deletes
 // task with id from database
-controller.hears('delete', 'direct_message,direct_mention,mention', function(bot, message) {
+octopus.controller.hears('delete', 'direct_message,direct_mention,mention', function(bot, message) {
 	var command = message.text.split(" ")[0];
 	var task_id = parseInt(getTaskBody(message.text));
 
-	firebase_storage.teams.get(task_id, function(err, team) {
+	octopus.firebase_storage.teams.get(task_id, function(err, team) {
 
 	})
 
@@ -114,10 +95,10 @@ controller.hears('delete', 'direct_message,direct_mention,mention', function(bot
 
 
 // SHOW TASKS: Bot listens for 'show tasks' to retrieve and display tasks from firebase
-controller.hears('show tasks', 'direct_message,direct_mention,mention', function(bot, message) {
-	firebase_storage.teams.all(function(err, data) {
+octopus.controller.hears('show tasks', 'direct_message,direct_mention,mention', function(bot, message) {
+	octopus.firebase_storage.teams.all(function(err, data) {
 		if (err) {
-			bot.reply(message, 'Sorry, I couldn\'t retrieve tasks!');
+			octopus.bot.reply(message, 'Sorry, I couldn\'t retrieve tasks!');
 			return;
 		}
 
@@ -140,7 +121,7 @@ controller.hears('show tasks', 'direct_message,direct_mention,mention', function
 			  attachments.push(TaskItem);
 			});
 
-			bot.reply(message,{
+			octopus.bot.reply(message,{
 		    text: 'Your Team\'s Tasks:',
 		    attachments: attachments,
 		  }, function(err,resp) {
@@ -154,18 +135,18 @@ controller.hears('show tasks', 'direct_message,direct_mention,mention', function
 });
 
 // CLAIM: Bot listens for 'claim' to have the user claim a task
-controller.hears('claim', 'direct_message,direct_mention,mention', function(bot, message) {
+octopus.controller.hears('claim', 'direct_message,direct_mention,mention', function(bot, message) {
 	var command = message.text.split(" ")[0];
 	var task_id = getTaskBody(message.text);
 
 	//TODO: assign task to user
 
-	firebase_storage.teams.get(task_id, function(err, team) {
+	octopus.firebase_storage.teams.get(task_id, function(err, team) {
 		if (err) {
-			bot.reply(message, 'Sorry, I couldn\'t add your task!');
+			octopus.bot.reply(message, 'Sorry, I couldn\'t add your task!');
 		}
 		else {
-			bot.reply(message, "[" + team.body + "] has been claimed.");
+			octopus.bot.reply(message, "[" + team.body + "] has been claimed.");
 		}
 	})
 });
