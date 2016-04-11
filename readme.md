@@ -40,3 +40,10 @@ Notice the use of parenthesis.
 @yourbot show tasks
 ```
 
+#### Removing or completing a task
+```bash
+@yourbot remove (task_id)
+```
+```bash
+@yourbot complete (task_id)
+```
