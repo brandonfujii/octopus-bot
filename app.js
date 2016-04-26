@@ -5,6 +5,20 @@
 var octopus = require('./botconfig');
 // get unique ID functions
 var uniquify = require('./uniquify');
+// Slack package to get data from Slack
+var Slack = require('slack-node');
+slack = new Slack(process.env.SLACK_ACCESS_TOKEN);
+
+function getUserName(userID, callback) {
+	slack.api("users.list", function(err, response) {
+		var memberdata = response.members;
+		for(var i = 0; i < memberdata.length; i++) {
+			if (memberdata[i].id == userID) {
+		  		return callback(memberdata[i].name);
+		  	}
+		}
+	});
+}
 
 // Task Object Constructor
 function Task(id, body, author, assignee, color, hex, channel) {
@@ -301,7 +315,6 @@ octopus.controller.hears('%remove', ['ambient', 'direct_message', 'direct_mentio
 			}
 		}
 	})
-
 });
 
 octopus.controller.hears('%complete', ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
@@ -380,11 +393,30 @@ octopus.controller.hears('claim', 'direct_message,direct_mention,mention', funct
 	var task_id = getTaskBody(message.text);
 
 	//TODO: assign task to user
+	octopus.firebase_storage.teams.all(function(err, data) {
+		if (err) {
+			octopus.bot.reply(message, 'Sorry, I couldn\'t access task database!');
+			return;
+		}
 
-	// octopus.firebase_storage.users.get(message.user, function(err, user) {
-	// 	octopus.bot.reply(message, "(" + team.body + ") has been claimed by " + user.name);
-	// })
+		var exists = false;
 
+		if (data) {
+			data.map(function(task) {
+				if (task_id == task.id) {
+					// PATCH function here
+					getUserName(message.user, function(username) {
+						octopus.firebase_storage.teams.updateAssignee(task_id, username);
+						octopus.bot.reply(message, username + " has claimed task " + task.id);
+					})
+					exists = true;
+				}
+			});
+			if (!exists) {
+				octopus.bot.reply(message, 'I couldn\'t find a task with that ID!');
+			}
+		}
+	})
 });
 
 

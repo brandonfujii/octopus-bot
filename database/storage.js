@@ -51,15 +51,15 @@ module.exports = function(config) {
         };
     };
 
-     var del = function(firebaseRef) {
+    var del = function(firebaseRef) {
         return function(id) {
             firebaseRef.child(id).remove();
         };
     };
 
-    var claim = function(firebaseRef) {
-        return function(id) {
-            firebaseRef.child(id).remove();
+    var updateAssignee = function(firebaseRef) {
+        return function(id, user) {
+            firebaseRef.child(id).update({ assignee: user });
         };
     };
 
@@ -69,21 +69,21 @@ module.exports = function(config) {
             save: save(teamsRef),
             all: all(teamsRef),
             del: del(teamsRef),
-            claim: claim(teamsRef)
+            updateAssignee: updateAssignee(teamsRef)
         },
         channels: {
             get: get(channelsRef),
             save: save(channelsRef),
             all: all(channelsRef),
             del: del(channelsRef),
-            claim: claim(channelsRef)
+            updateAssignee: updateAssignee(teamsRef)
         },
         users: {
             get: get(usersRef),
             save: save(usersRef),
             all: all(usersRef),
             del: del(usersRef),
-            claim: claim(usersRef)
+            updateAssignee: updateAssignee(teamsRef)
         }
     };
 
