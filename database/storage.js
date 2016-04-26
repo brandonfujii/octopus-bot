@@ -57,24 +57,33 @@ module.exports = function(config) {
         };
     };
 
+    var claim = function(firebaseRef) {
+        return function(id) {
+            firebaseRef.child(id).remove();
+        };
+    };
+
     var storage = {
         teams: {
             get: get(teamsRef),
             save: save(teamsRef),
             all: all(teamsRef),
-            del: del(teamsRef)
+            del: del(teamsRef),
+            claim: claim(teamsRef)
         },
         channels: {
             get: get(channelsRef),
             save: save(channelsRef),
             all: all(channelsRef),
-            del: del(channelsRef)
+            del: del(channelsRef),
+            claim: claim(channelsRef)
         },
         users: {
             get: get(usersRef),
             save: save(usersRef),
             all: all(usersRef),
-            del: del(usersRef)
+            del: del(usersRef),
+            claim: claim(usersRef)
         }
     };
 

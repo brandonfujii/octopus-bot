@@ -7,13 +7,14 @@ var octopus = require('./botconfig');
 var uniquify = require('./uniquify');
 
 // Task Object Constructor
-function Task(id, body, author, assignee, color, hex) {
+function Task(id, body, author, assignee, color, hex, channel) {
 	this.id = id;
 	this.body = body;
 	this.author = author;
 	this.assignee = assignee;
 	this.color = color;
 	this.hex = hex;
+	this.channel = channel;
 }
 
 // Parses command to get task user wants to interact with
@@ -23,12 +24,21 @@ function getTaskBody( str ) {
 		return str.match(/\(([^)]+)\)/)[1];
 	}
 	else {
-		return "Command not found";
+		return;
+	}
+}
+
+function getChannel( str ) {
+	if (/#\w+/g.test(str)) {
+		return str.match(/#(\w+)/)[1]
+	}
+	else {
+		return;
 	}
 }
 
 // HELP: Bot listens for 'help', then shows documentation for octopus
-octopus.controller.hears('help', 'direct_message,direct_mention,mention', function(bot, message) {
+octopus.controller.hears('help', ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
   var attachments = [];
   var addTaskHelp = {
   	title: 'Adding a task:',
@@ -42,6 +52,19 @@ octopus.controller.hears('help', 'direct_message,direct_mention,mention', functi
     fields: [],
   };
 
+  var removeTaskHelp = {
+  	title: 'Removing a task:',
+    color: '#FF7E82',
+    fields: [],
+  };
+
+  var completeTaskHelp = {
+  	title: 'Completing a task:',
+    color: '#FF7E82',
+    fields: [],
+  };
+
+
   addTaskHelp.fields.push({
     label: 'AddTask',
     value: '@slacktopus: add (your_task)',
@@ -54,8 +77,22 @@ octopus.controller.hears('help', 'direct_message,direct_mention,mention', functi
     short: true,
   });
 
+  removeTaskHelp.fields.push({
+    label: 'RemoveTask',
+    value: '@slacktopus: remove (task_id)',
+    short: true,
+  });
+
+  completeTaskHelp.fields.push({
+    label: 'CompleteTask',
+    value: '@slacktopus: complete (task_id)',
+    short: true,
+  });
+
   attachments.push(addTaskHelp);
   attachments.push(showTasksHelp);
+  attachments.push(removeTaskHelp);
+  attachments.push(completeTaskHelp);
 
   octopus.bot.reply(message,{
     text: 'Here are some commands you can perform with Octopus:',
@@ -65,30 +102,180 @@ octopus.controller.hears('help', 'direct_message,direct_mention,mention', functi
   });
 });
 
-// ADD: Bot listens for 'add' to add a task to firebase
-octopus.controller.hears('add', 'direct_message,direct_mention,mention', function(bot, message) {
-	var command = message.text.split(" ")[0];
-	var body = getTaskBody(message.text);
-	var id_tag = uniquify.checkDBForExistingID();
-	var task_id = id_tag.id;
-	var colorObj = id_tag.color;
-	var task = new Task(task_id, body, message.user, null, colorObj.name, colorObj.hex);
 
-	octopus.firebase_storage.teams.save(task, function(err) {
-		if (err) {
-			octopus.bot.reply(message, 'Sorry, I couldn\'t add your task!');
+octopus.controller.hears(['add a task', 'add task', 'add meeting', 'add to tasks'], ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
+	octopus.bot.startConversation(message, function(err, convo) {
+		if (!err) {
+			convo.ask('What do you want to add?', function(response, convo) {
+				convo.ask('You want to add *' + response.text + '*?', [
+						{
+							pattern: 'yes',
+							callback: function(response, convo) {
+								convo.next();
+							}
+						},
+						{
+							pattern: 'no',
+							callback: function(response, convo) {
+								convo.stop();
+							}
+						},
+						{
+	                        default: true,
+	                        callback: function(response, convo) {
+	                            convo.repeat();
+	                            convo.next();
+	                        }
+                        }
+					]);
+
+					convo.next();
+			}, {'key': 'taskbody'});
+
+			convo.on('end', function(convo) {
+                if (convo.status == 'completed') {
+                	var body = convo.extractResponse('taskbody');
+                   	var id_tag = uniquify.checkDBForExistingID();
+					var task_id = id_tag.id;
+					var colorObj = id_tag.color;
+					var task = new Task(task_id, body, message.user, null, colorObj.name, colorObj.hex, null);
+                    
+                    octopus.firebase_storage.teams.save(task, function(err) {
+                    	if (err) {
+                    		octopus.bot.reply(message, 'Sorry, I couldn\'t add your task!');
+                    	}
+                    	else {
+                    		octopus.bot.reply(message, 'Nice! You\'ve added a task called \"' + task.body + '\" with the id, _' + task.id + '_');
+                    	}
+                    
+                    });
+
+                } else {
+                    // this happens if the conversation ended prematurely for some reason
+                    bot.reply(message, 'Okay, nevermind!');
+                }
+            });
 		}
-		else {
-			octopus.bot.reply(message, 'Task added!');
-		}
-	})
+	});
 });
+
+// ADD: Bot listens for 'add' to add a task to firebase
+octopus.controller.hears('%add', ['ambient', 'direct_message', 'direct_mention' ,'mention'], function(bot, message) {
+
+	if (message.text.split(" ")[0].indexOf('#') != -1) {
+		// TODO: make a check to see if channel exists in team
+		var channel = getChannel(message.text);
+		var body = getTaskBody(message.text);
+		var id_tag = uniquify.checkDBForExistingID();
+		var task_id = id_tag.id;
+		var colorObj = id_tag.color;
+		var task = new Task(task_id, body, message.user, null, colorObj.name, colorObj.hex, channel);
+
+		octopus.firebase_storage.channels.save(task, function(err) {
+			if (err) {
+				octopus.bot.reply(message, 'Sorry, I couldn\'t add your task!');
+			}
+			else {
+
+				octopus.bot.reply(message, 'Task added to #' + channel + '!');
+			}
+		})
+	}
+	else {
+		var command = message.text.split(" ")[0];
+		var body = getTaskBody(message.text);
+		var id_tag = uniquify.checkDBForExistingID();
+		var task_id = id_tag.id;
+		var colorObj = id_tag.color;
+		var task = new Task(task_id, body, message.user, null, colorObj.name, colorObj.hex, null);
+
+		octopus.firebase_storage.teams.save(task, function(err) {
+			if (err) {
+				octopus.bot.reply(message, 'Sorry, I couldn\'t add your task!');
+			}
+			else {
+
+				octopus.bot.reply(message, 'Nice! You\'ve added a task called \"' + task.body + '\" with the id, _' + task.id + '_');
+			}
+		})
+	}
+	
+});
+
+
+
+octopus.controller.hears(['remove a task', 'remove task', 'remove my task', 'remove from tasks'], ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
+	octopus.bot.startConversation(message, function(err, convo) {
+		if (!err) {
+			convo.ask('Okay, what\'s the id of the task you want to remove?', function(response, convo) {
+				convo.ask('You want to remove task *' + response.text + '*?', [
+						{
+							pattern: 'yes',
+							callback: function(response, convo) {
+								convo.next();
+							}
+						},
+						{
+							pattern: 'no',
+							callback: function(response, convo) {
+								convo.stop();
+							}
+						},
+						{
+	                        default: true,
+	                        callback: function(response, convo) {
+	                            convo.repeat();
+	                            convo.next();
+	                        }
+                        }
+					]);
+					convo.next();
+
+			}, {'key': 'taskid'});
+
+			convo.on('end', function(convo) {
+                if (convo.status == 'completed') {
+                	var task_id = convo.extractResponse('taskid');
+                    
+                    octopus.firebase_storage.teams.all(function(err, data) {
+                    	if (err) {
+                    		octopus.bot.reply(message, 'Sorry, I couldn\'t add your task!');
+                    	}
+                    	else {
+                    		var exists = false;
+
+							if (data) {
+								data.map(function(task) {
+									if (task_id == task.id) {
+										// DELETE function here
+										octopus.firebase_storage.teams.del(task_id);
+										octopus.bot.reply(message, 'Okay! Task ' + task_id + ' removed!'); 
+										exists = true;
+									}
+								});
+								if (!exists) {
+									octopus.bot.reply(message, 'I couldn\'t find a task with that ID!');
+								}
+							}
+                    	}
+                    
+                    });
+
+                } else {
+                    // this happens if the conversation ended prematurely for some reason
+                    bot.reply(message, 'Okay, nevermind!');
+                }
+            });
+		}
+	});
+});
+
 
 // REMOVE/COMPLETE: Bot listens for 'remove' or 'complete' and a (task_id), then deletes
 // task with id from database
 // TODO: give different responses to remove and complete
 // For example, 'Task completed!', instead of 'Task removed' on complete
-octopus.controller.hears(['remove', 'complete'], 'direct_message,direct_mention,mention', function(bot, message) {
+octopus.controller.hears('%remove', ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
 	var command = message.text.split(" ")[0];
 	var task_id = getTaskBody(message.text);
 
@@ -117,9 +304,38 @@ octopus.controller.hears(['remove', 'complete'], 'direct_message,direct_mention,
 
 });
 
+octopus.controller.hears('%complete', ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
+	var command = message.text.split(" ")[0];
+	var task_id = getTaskBody(message.text);
+
+	octopus.firebase_storage.teams.all(function(err, data) {
+		if (err) {
+			octopus.bot.reply(message, 'Sorry, I couldn\'t access task database!');
+			return;
+		}
+
+		var exists = false;
+
+		if (data) {
+			data.map(function(task) {
+				if (task_id == task.id) {
+					// DELETE function here
+					octopus.firebase_storage.teams.del(task_id);
+					octopus.bot.reply(message, 'Task completed!'); 
+					exists = true;
+				}
+			});
+			if (!exists) {
+				octopus.bot.reply(message, 'I couldn\'t find a task with that ID!');
+			}
+		}
+	})
+
+});
+
 
 // SHOW TASKS: Bot listens for 'show tasks' to retrieve and display tasks from firebase
-octopus.controller.hears('show tasks', 'direct_message,direct_mention,mention', function(bot, message) {
+octopus.controller.hears(['%show', 'see tasks', 'show tasks', 'see my tasks', 'show my tasks', 'task list', 'show me my tasks'], ['ambient', 'direct_message', 'direct_mention','mention'], function(bot, message) {
 	octopus.firebase_storage.teams.all(function(err, data) {
 		if (err) {
 			octopus.bot.reply(message, 'Sorry, I couldn\'t retrieve tasks!');
@@ -165,14 +381,10 @@ octopus.controller.hears('claim', 'direct_message,direct_mention,mention', funct
 
 	//TODO: assign task to user
 
-	octopus.firebase_storage.teams.get(task_id, function(err, team) {
-		if (err) {
-			octopus.bot.reply(message, 'Sorry, I couldn\'t add your task!');
-		}
-		else {
-			octopus.bot.reply(message, "[" + team.body + "] has been claimed.");
-		}
-	})
+	// octopus.firebase_storage.users.get(message.user, function(err, user) {
+	// 	octopus.bot.reply(message, "(" + team.body + ") has been claimed by " + user.name);
+	// })
+
 });
 
 
