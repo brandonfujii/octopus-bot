@@ -348,7 +348,7 @@ octopus.controller.hears('%complete', ['ambient', 'direct_message', 'direct_ment
 
 
 // SHOW TASKS: Bot listens for 'show tasks' to retrieve and display tasks from firebase
-octopus.controller.hears(['%show', 'see tasks', 'show tasks', 'see my tasks', 'show my tasks', 'task list', 'show me my tasks'], ['ambient', 'direct_message', 'direct_mention','mention'], function(bot, message) {
+octopus.controller.hears(['%show', 'see tasks', 'show tasks', 'see my tasks', 'show my tasks', 'task list', 'show me my tasks', 'show me the tasks', 'show me tasks'], ['ambient', 'direct_message', 'direct_mention','mention'], function(bot, message) {
 	octopus.firebase_storage.teams.all(function(err, data) {
 		if (err) {
 			octopus.bot.reply(message, 'Sorry, I couldn\'t retrieve tasks!');
@@ -365,11 +365,20 @@ octopus.controller.hears(['%show', 'see tasks', 'show tasks', 'see my tasks', 's
 			    fields: [],
 			  };
 
+			if (task.assignee) {
+
 				TaskItem.fields.push({
-			    label: 'TaskItem',
-			    value: task.body,
-			    short: true,
+				    label: 'TaskItem',
+				    value: task.body + '. Claimed by @' + task.assignee,
+				    short: true,
 			  });
+			} else {
+				TaskItem.fields.push({
+				    label: 'TaskItem',
+				    value: task.body,
+				    short: true,
+				});
+			}
 
 			  attachments.push(TaskItem);
 			});
