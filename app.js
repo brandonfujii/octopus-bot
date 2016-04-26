@@ -20,6 +20,19 @@ function getUserName(userID, callback) {
 	});
 }
 
+function doesUserExist(userID, callback) {
+	slack.api("users.list", function(err, response) {
+		var memberdata = response.members;
+		for(var i = 0; i < memberdata.length; i++) {
+			if (memberdata[i].id == userID) {
+		  		return true;
+		  	}
+		}
+		return false;
+	});
+}
+
+
 // Task Object Constructor
 function Task(id, body, author, assignee, color, hex, channel) {
 	this.id = id;
@@ -495,5 +508,44 @@ octopus.controller.hears('%claim', ['ambient', 'direct_message', 'direct_mention
 	})
 });
 
+// ASSIGN: Bot listens for 'assign' to have a task assigned to a specific user
+octopus.controller.hears('%assign', ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
+	var command = message.text.split(" ")[0];
+	var task_id = getTaskBody(message.text);
+	var assignedUserID = message.text.split(" ")[3].substring(2, message.text.split(" ")[3].length-1);
 
+	//TODO: assign task to user
+	octopus.firebase_storage.teams.all(function(err, data) {
+		if (err) {
+			octopus.bot.reply(message, 'Sorry, I couldn\'t access task database!');
+			return;
+		}
+		// doesUserExist function needs to be fixed
+		doesUserExist(assignedUserID, function(doesExist) {
+			console.log("calling does user exist");
+			console.log(doesExist);
+			if(doesExist == false) {
+				octopus.bot.reply(message, 'I couldn\'t find that user!');
+				return;
+			}
+		})
+
+		var exists = false;
+
+		if (data) {
+			data.map(function(task) {
+				if (task_id == task.id) {
+					getUserName(assignedUserID, function(username) {
+						octopus.firebase_storage.teams.updateAssignee(task_id, username);
+						octopus.bot.reply(message, task.id + " has been assigned to " + username);
+					})
+					exists = true;
+				}
+			});
+			if (!exists) {
+				octopus.bot.reply(message, 'I couldn\'t find a task with that ID!');
+			}
+		}
+	})
+});
 
