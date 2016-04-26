@@ -388,7 +388,7 @@ octopus.controller.hears(['%show', 'see tasks', 'show tasks', 'see my tasks', 's
 });
 
 // CLAIM: Bot listens for 'claim' to have the user claim a task
-octopus.controller.hears('claim', 'direct_message,direct_mention,mention', function(bot, message) {
+octopus.controller.hears('claim', ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
 	var command = message.text.split(" ")[0];
 	var task_id = getTaskBody(message.text);
 
