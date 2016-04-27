@@ -71,55 +71,73 @@ octopus.controller.hears('help', ['ambient', 'direct_message', 'direct_mention',
   	title: 'Adding a task:',
     color: '#FF7E82',
     fields: [],
+    mrkdwn_in: ['text', 'pretext', 'fields']
   };
 
   var showTasksHelp = {
   	title: 'Viewing your team\'s tasks:',
     color: '#FF7E82',
     fields: [],
+    mrkdwn_in: ['text', 'pretext', 'fields']
   };
 
   var removeTaskHelp = {
   	title: 'Removing a task:',
     color: '#FF7E82',
     fields: [],
+    mrkdwn_in: ['text', 'pretext', 'fields']
   };
 
   var completeTaskHelp = {
   	title: 'Completing a task:',
     color: '#FF7E82',
     fields: [],
+    mrkdwn_in: ['text', 'pretext', 'fields']
   };
 
+  var claimTaskHelp = {
+  	title: 'Claiming a task:',
+    color: '#FF7E82',
+    fields: [],
+    mrkdwn_in: ['text', 'pretext', 'fields']
+  };
 
   addTaskHelp.fields.push({
     label: 'AddTask',
-    value: '@slacktopus: add (your_task)',
+    value: '`%add (your_task)`',
     short: true,
   });
 
   showTasksHelp.fields.push({
     label: 'ShowTask',
-    value: '@slacktopus: show tasks',
+    value: '`%show`',
     short: true,
   });
 
   removeTaskHelp.fields.push({
     label: 'RemoveTask',
-    value: '@slacktopus: remove (task_id)',
+    value: '`%remove (task_id)`',
     short: true,
   });
 
   completeTaskHelp.fields.push({
     label: 'CompleteTask',
-    value: '@slacktopus: complete (task_id)',
+    value: '`%complete (task_id)`',
     short: true,
   });
+
+  claimTaskHelp.fields.push({
+    label: 'ClaimTask',
+    value: '`%claim (task_id)`',
+    short: true,
+  });
+
 
   attachments.push(addTaskHelp);
   attachments.push(showTasksHelp);
   attachments.push(removeTaskHelp);
   attachments.push(completeTaskHelp);
+  attachments.push(claimTaskHelp);
 
   octopus.bot.reply(message,{
     text: 'Here are some commands you can perform with Octopus:',
