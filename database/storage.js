@@ -34,6 +34,7 @@ module.exports = function(config) {
         };
     };
 
+
     var all = function(firebaseRef) {
         return function(cb) {
             firebaseRef.once('value',
@@ -43,6 +44,7 @@ module.exports = function(config) {
                         list.push(records.val()[key]);
                     }
                     cb(undefined, list);
+    
                 },
                 function(err) {
                     cb(err, undefined);

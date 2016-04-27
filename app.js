@@ -102,6 +102,13 @@ octopus.controller.hears('help', ['ambient', 'direct_message', 'direct_mention',
     mrkdwn_in: ['text', 'pretext', 'fields']
   };
 
+  var assignTaskHelp = {
+  	title: 'Assigning a task:',
+    color: '#FF7E82',
+    fields: [],
+    mrkdwn_in: ['text', 'pretext', 'fields']
+  };
+
   addTaskHelp.fields.push({
     label: 'AddTask',
     value: '`%add (your_task)`',
@@ -132,12 +139,21 @@ octopus.controller.hears('help', ['ambient', 'direct_message', 'direct_mention',
     short: true,
   });
 
+  assignTaskHelp.fields.push({
+    label: 'AssignTask',
+    value: '`%assign (task_id) to @person`',
+    short: true,
+  });
+
+
+
 
   attachments.push(addTaskHelp);
   attachments.push(showTasksHelp);
   attachments.push(removeTaskHelp);
   attachments.push(completeTaskHelp);
   attachments.push(claimTaskHelp);
+  attachments.push(assignTaskHelp);
 
   octopus.bot.reply(message,{
     text: 'Here are some commands you can perform with Octopus:',
@@ -380,6 +396,7 @@ octopus.controller.hears('%complete', ['ambient', 'direct_message', 'direct_ment
 
 // SHOW TASKS: Bot listens for 'show tasks' to retrieve and display tasks from firebase
 octopus.controller.hears(['%show', 'see tasks', 'show tasks', 'see my tasks', 'show my tasks', 'task list', 'show me my tasks', 'show me the tasks', 'show me tasks'], ['ambient', 'direct_message', 'direct_mention','mention'], function(bot, message) {
+
 	octopus.firebase_storage.teams.all(function(err, data) {
 		if (err) {
 			octopus.bot.reply(message, 'Sorry, I couldn\'t retrieve tasks!');
@@ -387,36 +404,57 @@ octopus.controller.hears(['%show', 'see tasks', 'show tasks', 'see my tasks', 's
 		}
 
 		if (data) {
-			var attachments = [];
+			var claimed = [];
+			var unclaimed = [];
 
 			data.map(function(task) {
 				var TaskItem = {
-			  	title: 'Task ' + task.id,
-			    color: '#' + task.hex,
-			    fields: [],
-			  };
+				  	title: 'Task ' + task.id,
+				    color: '#' + task.hex,
+				    fields: [],
+				    mrkdwn_in: ['text', 'pretext', 'fields'],
+			  	};
 
 			if (task.assignee) {
 
 				TaskItem.fields.push({
 				    label: 'TaskItem',
-				    value: task.body + '. Claimed by @' + task.assignee,
+				    value: '*Task*: ' + task.body,
 				    short: true,
-			  });
-			} else {
-				TaskItem.fields.push({
-				    label: 'TaskItem',
-				    value: task.body,
-				    short: true,
-				});
-			}
+			  	});
 
-			  attachments.push(TaskItem);
+			  	TaskItem.fields.push({
+			  		label: 'AssignedTo',
+			  		value: '*Assigned to*: @' + task.assignee,
+			  		short: true,
+			  	});
+
+			  	claimed.push(TaskItem);
+			  	
+			  }
+
+			  else {
+			  	TaskItem.fields.push({
+				    label: 'TaskItem',
+				    value: '*Task*: ' + task.body,
+				    short: true,
+			  	});
+
+			  	unclaimed.push(TaskItem);
+			  }
+			  
 			});
 
 			octopus.bot.reply(message,{
-		    text: 'Your Team\'s Tasks:',
-		    attachments: attachments,
+		    text: 'Claimed Tasks:',
+		    attachments: claimed,
+		  }, function(err,resp) {
+		    console.log(err,resp);
+		  });
+
+			octopus.bot.reply(message,{
+		    text: 'Unclaimed Tasks:',
+		    attachments: unclaimed,
 		  }, function(err,resp) {
 		    console.log(err,resp);
 		  });
