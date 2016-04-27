@@ -117,7 +117,7 @@ octopus.controller.hears('help', ['ambient', 'direct_message', 'direct_mention',
 });
 
 
-octopus.controller.hears(['add a task', 'add task', 'add meeting', 'add to tasks'], ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
+octopus.controller.hears(['add', 'add a task', 'add task', 'add meeting', 'add to tasks'], ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
 	octopus.bot.startConversation(message, function(err, convo) {
 		if (!err) {
 			convo.ask('What do you want to add?', function(response, convo) {
@@ -348,13 +348,14 @@ octopus.controller.hears('%complete', ['ambient', 'direct_message', 'direct_ment
 
 
 // SHOW TASKS: Bot listens for 'show tasks' to retrieve and display tasks from firebase
-octopus.controller.hears(['%show', 'see tasks', 'show tasks', 'see my tasks', 'show my tasks', 'task list', 'show me my tasks'], ['ambient', 'direct_message', 'direct_mention','mention'], function(bot, message) {
+octopus.controller.hears(['%show', 'show','see tasks', 'show tasks', 'see my tasks', 'show my tasks', 'task list', 'show me my tasks'], ['ambient', 'direct_message', 'direct_mention','mention'], function(bot, message) {
 	octopus.firebase_storage.teams.all(function(err, data) {
 		if (err) {
 			octopus.bot.reply(message, 'Sorry, I couldn\'t retrieve tasks!');
 			return;
 		}
 
+    /*
 		if (data) {
 			var attachments = [];
 
@@ -368,24 +369,63 @@ octopus.controller.hears(['%show', 'see tasks', 'show tasks', 'see my tasks', 's
 				TaskItem.fields.push({
 			    label: 'TaskItem',
 			    value: task.body,
+			    //value: task.body + '\n\tclaim: :hand:\tremove: :x:\tcomplete: :white_check_mark:',
 			    short: true,
 			  });
 
 			  attachments.push(TaskItem);
 			});
-
+      
 			octopus.bot.reply(message,{
 		    text: 'Your Team\'s Tasks:',
 		    attachments: attachments,
 		  }, function(err,resp) {
 		    console.log(err,resp);
 		  });
-
 		}
+    */
+
+  if (data) {
+    data.map(function(task) {
+      var TaskItem = {
+        title: 'Task ' + task.id,
+        color: '#' + task.hex,
+        fields: [],
+      };
+      
+      TaskItem.fields.push({
+        label: 'TaskItem',
+        value: task.body,
+        short: true,
+      });
+
+      octopus.bot.reply(message, {
+        text: 'i need text?', 
+        attachments: TaskItem,
+      }, function(err, resp) {
+        console.log(err, resp);
+      });
+    }
+    )
+  }
 
 	})
 
 });
+
+
+// REACTION EMOJI: Bot listens for its own message for any tasks and adds reactions to them
+octopus.controller.hears('task', ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
+  octopus.bot.api.reactions.add({
+  timestamp: message.ts,
+  channel: message.channel,
+  name: 'robot_face',
+},function(err, res) {
+    if (err) {
+        bot.botkit.log('Failed to add emoji reaction :(',err);
+    }
+  })
+})
 
 // CLAIM: Bot listens for 'claim' to have the user claim a task
 octopus.controller.hears('claim', ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
