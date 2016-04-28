@@ -34,7 +34,7 @@ function doesUserExist(userID, callback) {
 
 
 // Task Object Constructor
-function Task(id, body, author, assignee, color, hex, channel) {
+function Task(id, body, author, assignee, color, hex, channel, status) {
 	this.id = id;
 	this.body = body;
 	this.author = author;
@@ -42,6 +42,7 @@ function Task(id, body, author, assignee, color, hex, channel) {
 	this.color = color;
 	this.hex = hex;
 	this.channel = channel;
+	this.status = status;
 }
 
 // Parses command to get task user wants to interact with
@@ -199,7 +200,7 @@ octopus.controller.hears(['add a task', 'add task', 'add meeting', 'add to tasks
                    	var id_tag = uniquify.checkDBForExistingID();
 					var task_id = id_tag.id;
 					var colorObj = id_tag.color;
-					var task = new Task(task_id, body, message.user, null, colorObj.name, colorObj.hex, null);
+					var task = new Task(task_id, body, message.user, null, colorObj.name, colorObj.hex, null, null);
                     
                     octopus.firebase_storage.teams.save(task, function(err) {
                     	if (err) {
@@ -230,7 +231,7 @@ octopus.controller.hears('%add', ['ambient', 'direct_message', 'direct_mention' 
 		var id_tag = uniquify.checkDBForExistingID();
 		var task_id = id_tag.id;
 		var colorObj = id_tag.color;
-		var task = new Task(task_id, body, message.user, null, colorObj.name, colorObj.hex, channel);
+		var task = new Task(task_id, body, message.user, null, colorObj.name, colorObj.hex, channel, null);
 
 		octopus.firebase_storage.channels.save(task, function(err) {
 			if (err) {
@@ -248,7 +249,7 @@ octopus.controller.hears('%add', ['ambient', 'direct_message', 'direct_mention' 
 		var id_tag = uniquify.checkDBForExistingID();
 		var task_id = id_tag.id;
 		var colorObj = id_tag.color;
-		var task = new Task(task_id, body, message.user, null, colorObj.name, colorObj.hex, null);
+		var task = new Task(task_id, body, message.user, null, colorObj.name, colorObj.hex, null, null);
 
 		octopus.firebase_storage.teams.save(task, function(err) {
 			if (err) {
@@ -591,6 +592,7 @@ octopus.controller.hears('%assign', ['ambient', 'direct_message', 'direct_mentio
 		if (data) {
 			data.map(function(task) {
 				if (task_id == task.id) {
+
 					getUserName(assignedUserID, function(username) {
 						octopus.firebase_storage.teams.updateAssignee(task_id, username);
 						octopus.bot.reply(message, task.id + " has been assigned to " + username);
