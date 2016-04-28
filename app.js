@@ -386,27 +386,26 @@ octopus.controller.hears(['%show', 'show','see tasks', 'show tasks', 'see my tas
     */
 
   if (data) {
-    data.map(function(task) {
-      var TaskItem = {
-        title: 'Task ' + task.id,
-        color: '#' + task.hex,
-        fields: [],
-      };
-      
-      TaskItem.fields.push({
-        label: 'TaskItem',
-        value: task.body,
-        short: true,
-      });
+      data.forEach(function(task) {
+        var TaskItem = {
+          title: 'Task ' + task.id,
+          color: '#' + task.hex,
+          fields: [],
+        };
+        
+        TaskItem.fields.push({
+          label: 'TaskItem',
+          value: task.body,
+          short: true,
+        });
 
-      octopus.bot.reply(message, {
-        text: 'i need text?', 
-        attachments: TaskItem,
-      }, function(err, resp) {
-        console.log(err, resp);
-      });
-    }
-    )
+        octopus.bot.reply(message, {
+          //text: 'i need text?', 
+          attachments: [TaskItem],
+        }, function(err, resp) {
+          console.log(err, resp);
+        });
+      })
   }
 
 	})
@@ -415,16 +414,19 @@ octopus.controller.hears(['%show', 'show','see tasks', 'show tasks', 'see my tas
 
 
 // REACTION EMOJI: Bot listens for its own message for any tasks and adds reactions to them
-octopus.controller.hears('task', ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
-  octopus.bot.api.reactions.add({
-  timestamp: message.ts,
-  channel: message.channel,
-  name: 'robot_face',
-},function(err, res) {
-    if (err) {
-        bot.botkit.log('Failed to add emoji reaction :(',err);
-    }
-  })
+octopus.controller.hears('i need text?', ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
+//octopus.controller.middleware.send.use(function(bot, message, next) {
+  //if (message.is_attachment) {
+    octopus.bot.api.reactions.add({
+    timestamp: message.ts,
+    channel: message.channel,
+    name: 'robot_face',
+  },function(err, res) {
+      if (err) {
+          bot.botkit.log('Failed to add emoji reaction :(',err);
+      }
+    })
+  //}
 })
 
 // CLAIM: Bot listens for 'claim' to have the user claim a task
