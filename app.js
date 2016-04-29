@@ -355,37 +355,7 @@ octopus.controller.hears(['%show', 'show','see tasks', 'show tasks', 'see my tas
 			return;
 		}
 
-    /*
-		if (data) {
-			var attachments = [];
-
-			data.map(function(task) {
-				var TaskItem = {
-			  	title: 'Task ' + task.id,
-			    color: '#' + task.hex,
-			    fields: [],
-			  };
-
-				TaskItem.fields.push({
-			    label: 'TaskItem',
-			    value: task.body,
-			    //value: task.body + '\n\tclaim: :hand:\tremove: :x:\tcomplete: :white_check_mark:',
-			    short: true,
-			  });
-
-			  attachments.push(TaskItem);
-			});
-      
-			octopus.bot.reply(message,{
-		    text: 'Your Team\'s Tasks:',
-		    attachments: attachments,
-		  }, function(err,resp) {
-		    console.log(err,resp);
-		  });
-		}
-    */
-
-  if (data) {
+    if (data) {
       data.forEach(function(task) {
         var TaskItem = {
           title: 'Task ' + task.id,
@@ -400,23 +370,53 @@ octopus.controller.hears(['%show', 'show','see tasks', 'show tasks', 'see my tas
         });
 
         octopus.bot.reply(message, {
-          //text: 'i need text?', 
+          text: 'use the reactions below to claim/assign/complete a task.', 
           attachments: [TaskItem],
+          //reactions: 'one',
         }, function(err, resp) {
           console.log(err, resp);
+
+          octopus.bot.api.reactions.add({
+            timestamp: resp.ts,
+            channel: resp.channel,
+            name: 'raised_hand',
+          }, function (err, message) {
+            if (err) {
+              bot.botkit.log('Failed to add CLAIM emoji reaction.');
+            }
+          })
+
+          octopus.bot.api.reactions.add({
+            timestamp: resp.ts,
+            channel: resp.channel,
+            name: 'x',
+          }, function (err, message) {
+            if (err) {
+              bot.botkit.log('Failed to add delete emoji reaction.');
+            }
+          })
+
+          octopus.bot.api.reactions.add({
+            timestamp: resp.ts,
+            channel: resp.channel,
+            name: 'white_check_mark',
+          }, function (err, message) {
+            if (err) {
+              bot.botkit.log('Failed to add COMPLETE emoji reaction.');
+            }
+          })
         });
       })
-  }
-
+    }
 	})
-
 });
 
 
 // REACTION EMOJI: Bot listens for its own message for any tasks and adds reactions to them
-octopus.controller.hears('i need text?', ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
+/*
+octopus.controller.hears('use the reactions below to claim/assign/complete a task.', ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
 //octopus.controller.middleware.send.use(function(bot, message, next) {
-  //if (message.is_attachment) {
+  //if (message.attachments) {
     octopus.bot.api.reactions.add({
     timestamp: message.ts,
     channel: message.channel,
@@ -428,6 +428,7 @@ octopus.controller.hears('i need text?', ['ambient', 'direct_message', 'direct_m
     })
   //}
 })
+*/
 
 // CLAIM: Bot listens for 'claim' to have the user claim a task
 octopus.controller.hears('claim', ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
