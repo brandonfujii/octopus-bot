@@ -356,6 +356,12 @@ octopus.controller.hears(['%show', 'show','see tasks', 'show tasks', 'see my tas
 		}
 
     if (data) {
+      octopus.bot.reply(message, {
+        text: '\tclaim: :raised_hand:\t delete: :x:\t complete: :white_check_mark:', 
+      }, function(err, resp) {
+        console.log(err, resp);
+      });
+
       data.forEach(function(task) {
         var TaskItem = {
           title: 'Task ' + task.id,
@@ -370,7 +376,6 @@ octopus.controller.hears(['%show', 'show','see tasks', 'show tasks', 'see my tas
         });
 
         octopus.bot.reply(message, {
-          text: 'use the reactions below to claim/assign/complete a task.', 
           attachments: [TaskItem],
           //reactions: 'one',
         }, function(err, resp) {
@@ -384,28 +389,28 @@ octopus.controller.hears(['%show', 'show','see tasks', 'show tasks', 'see my tas
             if (err) {
               bot.botkit.log('Failed to add CLAIM emoji reaction.');
             }
-          })
 
-          octopus.bot.api.reactions.add({
-            timestamp: resp.ts,
-            channel: resp.channel,
-            name: 'x',
-          }, function (err, message) {
-            if (err) {
-              bot.botkit.log('Failed to add delete emoji reaction.');
-            }
-          })
+            octopus.bot.api.reactions.add({
+              timestamp: resp.ts,
+              channel: resp.channel,
+              name: 'x',
+            }, function (err, message) {
+              if (err) {
+                bot.botkit.log('Failed to add DELETE emoji reaction.');
+              }
 
-          octopus.bot.api.reactions.add({
-            timestamp: resp.ts,
-            channel: resp.channel,
-            name: 'white_check_mark',
-          }, function (err, message) {
-            if (err) {
-              bot.botkit.log('Failed to add COMPLETE emoji reaction.');
-            }
+              octopus.bot.api.reactions.add({
+                timestamp: resp.ts,
+                channel: resp.channel,
+                name: 'white_check_mark',
+              }, function (err, message) {
+                if (err) {
+                  bot.botkit.log('Failed to add COMPLETE emoji reaction.');
+                }
+              })
+            })
           })
-        });
+        }); //
       })
     }
 	})
