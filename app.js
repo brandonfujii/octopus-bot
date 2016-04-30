@@ -208,6 +208,74 @@ octopus.controller.hears(['add a task', 'add task', 'add meeting', 'add to tasks
                     	}
                     	else {
                     		octopus.bot.reply(message, 'Nice! You\'ve added a task called \"' + task.body + '\" with the id, _' + task.id + '_');
+                    		 var additional_commands = [];
+							 var AssignTask = {
+							  	title: 'Assign your task:',
+							    color: '#FF7E82',
+							    fields: [],
+							    mrkdwn_in: ['text', 'pretext', 'fields']
+							  };
+
+							  AssignTask.fields.push({
+							    label: 'AssignTask',
+							    value: '`%assign (' + task_id + ') to @username`',
+							    short: true,
+							  });
+
+							  additional_commands.push(AssignTask);
+
+							  var ViewTask = {
+							  	title: 'View your tasks:',
+							    color: '#FF7E82',
+							    fields: [],
+							    mrkdwn_in: ['text', 'pretext', 'fields']
+							  };
+
+							  ViewTask.fields.push({
+							    label: 'ViewTask',
+							    value: '`%show` or show me my tasks`',
+							    short: true,
+							  });
+
+							  additional_commands.push(ViewTask);
+
+							  var RemoveTask = {
+							  	title: 'Remove your task:',
+							    color: '#FF7E82',
+							    fields: [],
+							    mrkdwn_in: ['text', 'pretext', 'fields']
+							  };
+
+							  RemoveTask.fields.push({
+							    label: 'RemoveTask',
+							    value: '`%remove (' + task_id +')` or "remove my task"',
+							    short: true,
+							  });
+
+							  additional_commands.push(RemoveTask);
+
+							  var CompleteTask = {
+							  	title: 'Complete your task:',
+							    color: '#FF7E82',
+							    fields: [],
+							    mrkdwn_in: ['text', 'pretext', 'fields']
+							  };
+
+							  CompleteTask.fields.push({
+							    label: 'CompleteTask',
+							    value: '`%complete (' + task_id +')` or "complete my task"',
+							    short: true,
+							  });
+
+							  additional_commands.push(CompleteTask);
+
+							  octopus.bot.reply(message,{
+							    text: 'Now, here are some ways you can interact with your task: ',
+							    attachments: additional_commands,
+							  },function(err,resp) {
+							    console.log(err,resp);
+							  });
+
                     	}
                     
                     });
@@ -220,6 +288,33 @@ octopus.controller.hears(['add a task', 'add task', 'add meeting', 'add to tasks
 		}
 	});
 });
+
+
+// octopus.controller.hears('%due', ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
+
+// 	octopus.firebase_storage.teams.all(function(err, data) {
+// 		if (err) {
+// 			octopus.bot.reply(message, 'Sorry, I couldn\'t access task database!');
+// 			return;
+// 		}
+
+// 		var exists = false;
+
+// 		if (data) {
+// 			data.map(function(task) {
+// 				if (task_id == task.id) {
+// 					var deadline = "";
+// 					task.deadline = deadline;
+// 					octopus.bot.reply(message, 'Deadline set up on ' + deadline); 
+// 					exists = true;
+// 				}
+// 			});
+// 			if (!exists) {
+// 				octopus.bot.reply(message, 'I couldn\'t find a task with that ID!');
+// 			}
+// 		}
+// 	})
+// });
 
 // ADD: Bot listens for 'add' to add a task to firebase
 octopus.controller.hears('%add', ['ambient', 'direct_message', 'direct_mention' ,'mention'], function(bot, message) {
@@ -258,6 +353,73 @@ octopus.controller.hears('%add', ['ambient', 'direct_message', 'direct_mention' 
 			else {
 
 				octopus.bot.reply(message, 'Nice! You\'ve added a task called \"' + task.body + '\" with the id, _' + task.id + '_');
+				var additional_commands = [];
+				 var AssignTask = {
+				  	title: 'Assign your task:',
+				    color: '#FF7E82',
+				    fields: [],
+				    mrkdwn_in: ['text', 'pretext', 'fields']
+				  };
+
+				  AssignTask.fields.push({
+				    label: 'AssignTask',
+				    value: '`%assign (' + task_id + ') to @username`',
+				    short: true,
+				  });
+
+				  additional_commands.push(AssignTask);
+
+				  var ViewTask = {
+				  	title: 'View your tasks:',
+				    color: '#FF7E82',
+				    fields: [],
+				    mrkdwn_in: ['text', 'pretext', 'fields']
+				  };
+
+				  ViewTask.fields.push({
+				    label: 'ViewTask',
+				    value: '`%show` or show me my tasks`',
+				    short: true,
+				  });
+
+				  additional_commands.push(ViewTask);
+
+				  var RemoveTask = {
+				  	title: 'Remove your task:',
+				    color: '#FF7E82',
+				    fields: [],
+				    mrkdwn_in: ['text', 'pretext', 'fields']
+				  };
+
+				  RemoveTask.fields.push({
+				    label: 'RemoveTask',
+				    value: '`%remove (' + task_id +')` or "remove my task"',
+				    short: true,
+				  });
+
+				  additional_commands.push(RemoveTask);
+
+				  var CompleteTask = {
+				  	title: 'Complete your task:',
+				    color: '#FF7E82',
+				    fields: [],
+				    mrkdwn_in: ['text', 'pretext', 'fields']
+				  };
+
+				  CompleteTask.fields.push({
+				    label: 'CompleteTask',
+				    value: '`%complete (' + task_id +')` or "complete my task"',
+				    short: true,
+				  });
+
+				  additional_commands.push(CompleteTask);
+
+				  octopus.bot.reply(message,{
+				    text: 'Now, here are some ways you can interact with your task: ',
+				    attachments: additional_commands,
+				  },function(err,resp) {
+				    console.log(err,resp);
+				  });
 			}
 		})
 	}
@@ -396,7 +558,7 @@ octopus.controller.hears('%complete', ['ambient', 'direct_message', 'direct_ment
 
 
 // SHOW TASKS: Bot listens for 'show tasks' to retrieve and display tasks from firebase
-octopus.controller.hears(['%show', 'see tasks', 'show tasks', 'see my tasks', 'show my tasks', 'task list', 'show me my tasks', 'show me the tasks', 'show me tasks'], ['ambient', 'direct_message', 'direct_mention','mention'], function(bot, message) {
+octopus.controller.hears(['%show', 'see tasks', 'view tasks', 'view my task', 'view task', 'show tasks', 'see my tasks', 'show my tasks', 'task list', 'show me my tasks', 'show me the tasks', 'show me tasks'], ['ambient', 'direct_message', 'direct_mention','mention'], function(bot, message) {
 
 	octopus.firebase_storage.teams.all(function(err, data) {
 		if (err) {
