@@ -7,6 +7,7 @@ var octopus = require('./botconfig');
 var uniquify = require('./uniquify');
 // Slack package to get data from Slack
 var Slack = require('slack-node');
+
 slack = new Slack(process.env.SLACK_ACCESS_TOKEN);
 
 function getUserName(userID, callback) {
@@ -746,5 +747,3 @@ octopus.controller.hears('%assign', ['ambient', 'direct_message', 'direct_mentio
     }
   })
 });
-
-Status API Training Shop Blog About
