@@ -17,6 +17,7 @@ function getUserName(userID, callback) {
 		  		return callback(memberdata[i].name);
 		  	}
 		}
+		return callback("usernameNotFound");
 	});
 }
 
@@ -726,15 +727,6 @@ octopus.controller.hears('%assign', ['ambient', 'direct_message', 'direct_mentio
 			octopus.bot.reply(message, 'Sorry, I couldn\'t access task database!');
 			return;
 		}
-		// doesUserExist function needs to be fixed
-		doesUserExist(assignedUserID, function(doesExist) {
-			console.log("calling does user exist");
-			console.log(doesExist);
-			if(doesExist == false) {
-				octopus.bot.reply(message, 'I couldn\'t find that user!');
-				return;
-			}
-		})
 
 		var exists = false;
 
@@ -743,6 +735,11 @@ octopus.controller.hears('%assign', ['ambient', 'direct_message', 'direct_mentio
 				if (task_id == task.id) {
 
 					getUserName(assignedUserID, function(username) {
+						console.log("username is " + username);
+						if(username == "usernameNotFound") {
+							octopus.bot.reply(message, 'I couldn\'t find that user!');
+							return;
+						}
 						octopus.firebase_storage.teams.updateAssignee(task_id, username);
 						octopus.bot.reply(message, task.id + " has been assigned to " + username);
 					})
