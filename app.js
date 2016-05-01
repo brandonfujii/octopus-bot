@@ -4,7 +4,7 @@
 // define database and botkit controller
 var octopus = require('./botconfig');
 // get unique ID functions
-var uniquify = require('./uniquify');
+var uniquify = require('./codify');
 // Slack package to get data from Slack
 var Slack = require('slack-node');
 
@@ -166,8 +166,28 @@ octopus.controller.hears('help', ['ambient', 'direct_message', 'direct_mention',
   });
 });
 
+octopus.controller.hears('%clear', ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
+  var command = message.text.split(" ")[0];
+  var task_id = getTaskBody(message.text);
 
-octopus.controller.hears(['add', 'add a task', 'add task', 'add meeting', 'add to tasks'], ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
+  octopus.firebase_storage.teams.all(function(err, data) {
+    if (err) {
+      octopus.bot.reply(message, 'Sorry, I couldn\'t access task database!');
+      return;
+    }
+
+    if (data) {
+      data.map(function(task) {
+          octopus.firebase_storage.teams.del(task.id);
+      });
+    }
+
+    octopus.bot.reply(message, 'All tasks cleared!');
+  })
+});
+
+
+octopus.controller.hears(['add a task', 'add task', 'add meeting', 'add to tasks'], ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
   octopus.bot.startConversation(message, function(err, convo) {
     if (!err) {
       convo.ask('What do you want to add?', function(response, convo) {
@@ -199,10 +219,8 @@ octopus.controller.hears(['add', 'add a task', 'add task', 'add meeting', 'add t
       convo.on('end', function(convo) {
                 if (convo.status == 'completed') {
                   var body = convo.extractResponse('taskbody');
-                    var id_tag = uniquify.checkDBForExistingID();
-          var task_id = id_tag.id;
-          var colorObj = id_tag.color;
-          var task = new Task(task_id, body, message.user, null, colorObj.name, colorObj.hex, null, null);
+                  var task_id = uniquify.checkDBForExistingID();
+                  var task = new Task(task_id, body, message.user, null, null, null, null, null);
                     
                     octopus.firebase_storage.teams.save(task, function(err) {
                       if (err) {
@@ -230,10 +248,8 @@ octopus.controller.hears('%add', ['ambient', 'direct_message', 'direct_mention' 
     // TODO: make a check to see if channel exists in team
     var channel = getChannel(message.text);
     var body = getTaskBody(message.text);
-    var id_tag = uniquify.checkDBForExistingID();
-    var task_id = id_tag.id;
-    var colorObj = id_tag.color;
-    var task = new Task(task_id, body, message.user, null, colorObj.name, colorObj.hex, channel, null);
+    var task_id = uniquify.checkDBForExistingID();
+    var task = new Task(task_id, body, message.user, null, null, null, channel, null);
 
     octopus.firebase_storage.channels.save(task, function(err) {
       if (err) {
@@ -248,10 +264,8 @@ octopus.controller.hears('%add', ['ambient', 'direct_message', 'direct_mention' 
   else {
     var command = message.text.split(" ")[0];
     var body = getTaskBody(message.text);
-    var id_tag = uniquify.checkDBForExistingID();
-    var task_id = id_tag.id;
-    var colorObj = id_tag.color;
-    var task = new Task(task_id, body, message.user, null, colorObj.name, colorObj.hex, null, null);
+    var task_id = uniquify.checkDBForExistingID();
+    var task = new Task(task_id, body, message.user, null, null, null, null, null);
 
     octopus.firebase_storage.teams.save(task, function(err) {
       if (err) {
@@ -406,67 +420,18 @@ octopus.controller.hears(['%show', 'show', 'see tasks', 'show tasks', 'see my ta
       return;
     }
 
-/*
-<<<<<<< HEAD
-    if (data) {
-      octopus.bot.reply(message, {
-        text: '\tclaim: :raised_hand:\t delete: :x:\t complete: :white_check_mark:', 
-      }, function(err, resp) {
-        console.log(err, resp);
-      });
-      data.forEach(function(task) {
-        var TaskItem = {
-          title: 'Task ' + task.id,
-          color: '#' + task.hex,
-          fields: [],
-        };
-        
-        TaskItem.fields.push({
-          label: 'TaskItem',
-          value: task.body,
-          short: true,
-        });
-        octopus.bot.reply(message, {
-          attachments: [TaskItem],
-        }, function(err, resp) {
-          console.log(err, resp);
-          octopus.bot.api.reactions.add({
-            timestamp: resp.ts,
-            channel: resp.channel,
-            name: 'raised_hand',
-          }, function (err, message) {
-            if (err) {
-              bot.botkit.log('Failed to add CLAIM emoji reaction.');
-            }
-            octopus.bot.api.reactions.add({
-              timestamp: resp.ts,
-              channel: resp.channel,
-              name: 'x',
-            }, function (err, message) {
-              if (err) {
-                bot.botkit.log('Failed to add DELETE emoji reaction.');
-              }
-              octopus.bot.api.reactions.add({
-                timestamp: resp.ts,
-                channel: resp.channel,
-                name: 'white_check_mark',
-              }, function (err, message) {
-                if (err) {
-                  bot.botkit.log('Failed to add COMPLETE emoji reaction.');
-                }
-              })
-            })
-          })
-        }); //
-      })
-    }
-=======
-*/
     if (data) {
       var claimed = [];
       var unclaimed = [];
 
       data.map(function(task) {
+        if (task.assignee) {
+          task.hex = '54D260';
+        }
+        else {
+          task.hex = 'E85D4C';
+        }
+
         var TaskItem = {
             title: 'Task ' + task.id,
             color: '#' + task.hex,
@@ -747,3 +712,10 @@ octopus.controller.hears('%assign', ['ambient', 'direct_message', 'direct_mentio
     }
   })
 });
+
+
+// REACTION CONTROLLERS
+octopus.controller.on('reaction_added',function(bot, event) {
+  octopus.bot.reply(reaction.item, "I love " +  event.reaction)
+})
+
