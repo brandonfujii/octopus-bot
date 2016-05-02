@@ -22,7 +22,6 @@ function getUserName(userID, callback) {
   });
 }
 
-
 // Task Object Constructor
 function Task(id, body, author, assignee, color, hex, channel, status) {
   this.id = id;
@@ -181,7 +180,7 @@ octopus.controller.hears(['add a task', 'add task', 'add meeting', 'add to tasks
       convo.ask('What do you want to add?', function(response, convo) {
         convo.ask('You want to add *' + response.text + '*?', [
             {
-              pattern: 'yes',
+              pattern: 'ye',
               callback: function(response, convo) {
                 convo.next();
               }
@@ -276,7 +275,7 @@ octopus.controller.hears(['remove a task', 'remove task', 'remove my task', 'rem
       convo.ask('Okay, what\'s the id of the task you want to remove?', function(response, convo) {
         convo.ask('You want to remove task *' + response.text + '*?', [
             {
-              pattern: 'yes',
+              pattern: 'ye',
               callback: function(response, convo) {
                 convo.next();
               }
@@ -571,7 +570,7 @@ octopus.controller.hears(['claim a task', 'claim it', 'claim my task', 'claim th
       convo.ask('What\'s the task id of the task you want to claim?', function(response, convo) {
         convo.ask('You want to claim task *' + response.text + '*?', [
             {
-              pattern: 'yes',
+              pattern: 'ye',
               callback: function(response, convo) {
                 convo.next();
               }
