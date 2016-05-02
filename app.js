@@ -223,8 +223,8 @@ octopus.controller.hears(['add a task', 'add task', 'add meeting', 'add to tasks
               // this happens if the conversation ended prematurely for some reason
               bot.reply(message, 'Okay, nevermind!');
           }
-        });
-      }
+      });
+    }
   });
 });
 
@@ -287,12 +287,12 @@ octopus.controller.hears(['remove a task', 'remove task', 'remove my task', 'rem
               }
             },
             {
-                          default: true,
-                          callback: function(response, convo) {
-                              convo.repeat();
-                              convo.next();
-                          }
-                        }
+              default: true,
+              callback: function(response, convo) {
+                  convo.repeat();
+                  convo.next();
+              }
+            }
           ]);
           convo.next();
 
@@ -322,7 +322,7 @@ octopus.controller.hears(['remove a task', 'remove task', 'remove my task', 'rem
                   octopus.bot.reply(message, 'I couldn\'t find a task with that ID!');
                 }
               }
-                      }
+                  }
                     
                     });
 
@@ -420,7 +420,7 @@ octopus.controller.hears(['%show', 'show', 'see tasks', 'show tasks', 'see my ta
         }
 
         var TaskItem = {
-            title: 'Task ' + task.id,
+            title: task.id,
             color: '#' + task.hex,
             fields: [],
             mrkdwn_in: ['text', 'pretext', 'fields'],
@@ -430,7 +430,7 @@ octopus.controller.hears(['%show', 'show', 'see tasks', 'show tasks', 'see my ta
 
         TaskItem.fields.push({
             label: 'TaskItem',
-            value: task.body,
+            value: '*Task*: ' + task.body,
             short: true,
           });
 
@@ -541,8 +541,9 @@ octopus.controller.hears(['%show', 'show', 'see tasks', 'show tasks', 'see my ta
               })
             })
           })
-        }); 
+        });       
       }
+    }
   })
 });
 
@@ -577,38 +578,38 @@ octopus.controller.hears(['claim a task', 'claim it', 'claim my task', 'claim th
       }, {'key': 'taskid'});
 
       convo.on('end', function(convo) {
-                if (convo.status == 'completed') {
-                  var task_id = convo.extractResponse('taskid');
-                    octopus.firebase_storage.teams.all(function(err, data) {
-                      if (err) {
-                        octopus.bot.reply(message, 'Sorry, I couldn\'t access task database!');
-                        return;
-                      }
-                      
-                      var exists = false;
-
-                      if (data) {
-                        data.map(function(task) {
-                          if (task_id == task.id) {
-                            getUserName(message.user, function(username) {
-                              octopus.firebase_storage.teams.updateAssignee(task_id, username);
-                              octopus.bot.reply(message, username + " has claimed task " + task.id);
-                            });
-                            exists = true;
-                          }
-                        });
-
-                        if (!exists) {
-                          octopus.bot.reply(message, 'I couldn\'t find a task with that ID!');
-                        }
-                      }
-                    });
-
-                } else {
-                    // this happens if the conversation ended prematurely for some reason
-                    bot.reply(message, 'Okay, nevermind!');
+          if (convo.status == 'completed') {
+            var task_id = convo.extractResponse('taskid');
+              octopus.firebase_storage.teams.all(function(err, data) {
+                if (err) {
+                  octopus.bot.reply(message, 'Sorry, I couldn\'t access task database!');
+                  return;
                 }
-            });
+                
+                var exists = false;
+
+                if (data) {
+                  data.map(function(task) {
+                    if (task_id == task.id) {
+                      getUserName(message.user, function(username) {
+                        octopus.firebase_storage.teams.updateAssignee(task_id, username);
+                        octopus.bot.reply(message, username + " has claimed task " + task.id);
+                      });
+                      exists = true;
+                    }
+                  });
+
+                  if (!exists) {
+                    octopus.bot.reply(message, 'I couldn\'t find a task with that ID!');
+                  }
+                }
+              });
+
+          } else {
+              // this happens if the conversation ended prematurely for some reason
+              bot.reply(message, 'Okay, nevermind!');
+          }
+      });
     }
   });
 });
@@ -692,7 +693,7 @@ octopus.controller.on('reaction_added',function(bot, event) {
 
    else if (event.reaction == 'hand') {
       console.log("this is the claim command. This is the user: " + event.user + ". And this is the item: " + event.item);
-      bot.reply(event.item, "I love " + event.item.ts);
+      bot.reply(event.item, "I love " + event.item);
      // Get task ID and user ID and run claim function
 
    }
