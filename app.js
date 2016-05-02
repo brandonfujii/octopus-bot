@@ -681,7 +681,6 @@ octopus.controller.hears('%assign', ['ambient', 'direct_message', 'direct_mentio
   var task_id = getTaskBody(message.text);
   var assignedUserID = message.text.split(" ")[3].substring(2, message.text.split(" ")[3].length-1);
 
-  //TODO: assign task to user
   octopus.firebase_storage.teams.all(function(err, data) {
     if (err) {
       octopus.bot.reply(message, 'Sorry, I couldn\'t access task database!');
@@ -716,6 +715,24 @@ octopus.controller.hears('%assign', ['ambient', 'direct_message', 'direct_mentio
 
 // REACTION CONTROLLERS
 octopus.controller.on('reaction_added',function(bot, event) {
-  octopus.bot.reply(reaction.item, "I love " +  event.reaction)
-})
+   
+   if (event.reaction == 'x') {
+      console.log("This is the remove command.");
+      // Get task ID and run remove function
+   }
+
+   else if (event.reaction == 'hand') {
+      console.log("this is the claim command. This is the user: " + event.user + ". And this is the item type: " + event.item.type);
+     // Get task ID and user ID and run claim function
+
+   }
+
+   else if (event.reaction == 'white_check_mark') {
+    console.log("this is the complete command");
+     // Get task ID and run complete function
+   }
+   else {
+     // do nothing
+   }
+});
 
