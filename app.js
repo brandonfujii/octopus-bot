@@ -420,7 +420,7 @@ octopus.controller.hears(['%show', 'show', 'see tasks', 'show tasks', 'see my ta
         }
 
         var TaskItem = {
-            title: task.id,
+            title: 'Task ' + task.id,
             color: '#' + task.hex,
             fields: [],
             mrkdwn_in: ['text', 'pretext', 'fields'],
@@ -430,7 +430,7 @@ octopus.controller.hears(['%show', 'show', 'see tasks', 'show tasks', 'see my ta
 
         TaskItem.fields.push({
             label: 'TaskItem',
-            value: '*Task*: ' + task.body,
+            value: task.body,
             short: true,
           });
 
