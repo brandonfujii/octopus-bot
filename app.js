@@ -22,19 +22,6 @@ function getUserName(userID, callback) {
   });
 }
 
-function doesUserExist(userID, callback) {
-  slack.api("users.list", function(err, response) {
-    var memberdata = response.members;
-    for(var i = 0; i < memberdata.length; i++) {
-      if (memberdata[i].id == userID) {
-          return true;
-        }
-    }
-    return false;
-  });
-}
-
-
 // Task Object Constructor
 function Task(id, body, author, assignee, color, hex, channel, status) {
   this.id = id;
@@ -193,7 +180,7 @@ octopus.controller.hears(['add a task', 'add task', 'add meeting', 'add to tasks
       convo.ask('What do you want to add?', function(response, convo) {
         convo.ask('You want to add *' + response.text + '*?', [
             {
-              pattern: 'yes',
+              pattern: 'ye',
               callback: function(response, convo) {
                 convo.next();
               }
@@ -288,7 +275,7 @@ octopus.controller.hears(['remove a task', 'remove task', 'remove my task', 'rem
       convo.ask('Okay, what\'s the id of the task you want to remove?', function(response, convo) {
         convo.ask('You want to remove task *' + response.text + '*?', [
             {
-              pattern: 'yes',
+              pattern: 'ye',
               callback: function(response, convo) {
                 convo.next();
               }
@@ -583,7 +570,7 @@ octopus.controller.hears(['claim a task', 'claim it', 'claim my task', 'claim th
       convo.ask('What\'s the task id of the task you want to claim?', function(response, convo) {
         convo.ask('You want to claim task *' + response.text + '*?', [
             {
-              pattern: 'yes',
+              pattern: 'ye',
               callback: function(response, convo) {
                 convo.next();
               }
@@ -694,7 +681,6 @@ octopus.controller.hears('%assign', ['ambient', 'direct_message', 'direct_mentio
         if (task_id == task.id) {
 
           getUserName(assignedUserID, function(username) {
-            console.log("username is " + username);
             if(username == "usernameNotFound") {
               octopus.bot.reply(message, 'I couldn\'t find that user!');
               return;
