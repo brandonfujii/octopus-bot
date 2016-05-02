@@ -31,19 +31,41 @@ This allows the program to know which bot to use and where to store the created 
 Go to the channel that you've invited your bot to. For each command you'll be mentioning your bot (@yourbot):
 #### Adding a task
 ```bash
-@yourbot add (this is a new task)
+%add (this is a new task)
 ```
 Notice the use of parenthesis.
 
-#### Viewing your team's tasks
+or something like:
 ```bash
-@yourbot show tasks
+can I add a task?
+```
+```bash
+add task
 ```
 
-#### Removing or completing a task
+#### Viewing your team's tasks
 ```bash
-@yourbot remove (task_id)
+%show
 ```
+or something like:
 ```bash
-@yourbot complete (task_id)
+show me my tasks
+```
+
+#### Removing a task
+```bash
+%remove (task_id)
+```
+or something like:
+```bash
+I wanna remove a task
+```
+
+### Completing a task
+```bash
+%complete (task_id)
+```
+or something like:
+```bash
+complete a task
 ```
