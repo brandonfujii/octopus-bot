@@ -192,39 +192,39 @@ octopus.controller.hears(['add a task', 'add task', 'add meeting', 'add to tasks
               }
             },
             {
-                          default: true,
-                          callback: function(response, convo) {
-                              convo.repeat();
-                              convo.next();
-                          }
-                        }
+              default: true,
+              callback: function(response, convo) {
+                  convo.repeat();
+                  convo.next();
+              }
+            }
           ]);
 
           convo.next();
       }, {'key': 'taskbody'});
 
       convo.on('end', function(convo) {
-                if (convo.status == 'completed') {
-                  var body = convo.extractResponse('taskbody');
-                  var task_id = uniquify.checkDBForExistingID();
-                  var task = new Task(task_id, body, message.user, null, null, null, null, null);
-                    
-                    octopus.firebase_storage.teams.save(task, function(err) {
-                      if (err) {
-                        octopus.bot.reply(message, 'Sorry, I couldn\'t add your task!');
-                      }
-                      else {
-                        octopus.bot.reply(message, 'Nice! You\'ve added a task called \"' + task.body + '\" with the id, _' + task.id + '_');
-                      }
-                    
-                    });
-
-                } else {
-                    // this happens if the conversation ended prematurely for some reason
-                    bot.reply(message, 'Okay, nevermind!');
+          if (convo.status == 'completed') {
+            var body = convo.extractResponse('taskbody');
+            var task_id = uniquify.checkDBForExistingID();
+            var task = new Task(task_id, body, message.user, null, null, null, null, null);
+              
+              octopus.firebase_storage.teams.save(task, function(err) {
+                if (err) {
+                  octopus.bot.reply(message, 'Sorry, I couldn\'t add your task!');
                 }
-            });
-    }
+                else {
+                  octopus.bot.reply(message, 'Nice! You\'ve added a task called \"' + task.body + '\" with the id, _' + task.id + '_');
+                }
+              
+              });
+
+          } else {
+              // this happens if the conversation ended prematurely for some reason
+              bot.reply(message, 'Okay, nevermind!');
+          }
+        });
+      }
   });
 });
 
@@ -430,7 +430,7 @@ octopus.controller.hears(['%show', 'show', 'see tasks', 'show tasks', 'see my ta
 
         TaskItem.fields.push({
             label: 'TaskItem',
-            value: '*Task*: ' + task.body,
+            value: task.body,
             short: true,
           });
 
@@ -541,25 +541,8 @@ octopus.controller.hears(['%show', 'show', 'see tasks', 'show tasks', 'see my ta
               })
             })
           })
-        }); //
+        }); 
       }
-
-      /*
-      octopus.bot.reply(message,{
-        text: 'Claimed Tasks:',
-        attachments: claimed,
-      }, function(err,resp) {
-        console.log(err,resp);
-      });
-      octopus.bot.reply(message,{
-        text: 'Unclaimed Tasks:',
-        attachments: unclaimed,
-      }, function(err,resp) {
-        console.log(err,resp);
-      */
-    }
-
-//>>>>>>> c9ef4545e3ad160bad7980ac1f90e79f7fb3be60
   })
 });
 
@@ -582,12 +565,12 @@ octopus.controller.hears(['claim a task', 'claim it', 'claim my task', 'claim th
               }
             },
             {
-                          default: true,
-                          callback: function(response, convo) {
-                              convo.repeat();
-                              convo.next();
-                          }
-                        }
+              default: true,
+              callback: function(response, convo) {
+                  convo.repeat();
+                  convo.next();
+              }
+            }
           ]);
 
           convo.next();
