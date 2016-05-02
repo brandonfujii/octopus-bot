@@ -708,7 +708,8 @@ octopus.controller.on('reaction_added',function(bot, event) {
    }
 
    else if (event.reaction == 'hand') {
-      console.log("this is the claim command. This is the user: " + event.user + ". And this is the item type: " + event.item.type);
+      console.log("this is the claim command. This is the user: " + event.user + ". And this is the item: " + event.item);
+      bot.reply(event.item, "I love " + event.item.ts);
      // Get task ID and user ID and run claim function
 
    }
@@ -719,6 +720,7 @@ octopus.controller.on('reaction_added',function(bot, event) {
    }
    else {
      // do nothing
+     bot.reply(event.item, ":" + event.reaction + ": back at you!");
    }
 });
 
