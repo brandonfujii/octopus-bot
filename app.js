@@ -7,6 +7,7 @@ var octopus = require('./botconfig');
 var uniquify = require('./codify');
 // Slack package to get data from Slack
 var Slack = require('slack-node');
+var async = require('async');
 
 slack = new Slack(process.env.SLACK_ACCESS_TOKEN);
 
@@ -398,6 +399,58 @@ octopus.controller.hears('%complete', ['ambient', 'direct_message', 'direct_ment
 });
 
 
+function loopTasks(arr, message, callback) {
+  for (var i = 0; i < arr.length; i++) {
+    octopus.bot.reply(message, {
+      attachments: [arr[i]],
+    }, function(err, resp) {
+      console.log(err, resp);
+
+      octopus.bot.api.reactions.add({
+        timestamp: resp.ts,
+        channel: resp.channel,
+        name: 'raised_hand',
+      }, function (err, message) {
+        if (err) {
+          bot.botkit.log('Failed to add CLAIM emoji reaction.');
+        }
+
+        octopus.bot.api.reactions.add({
+          timestamp: resp.ts,
+          channel: resp.channel,
+          name: 'x',
+        }, function (err, message) {
+          if (err) {
+            bot.botkit.log('Failed to add DELETE emoji reaction.');
+          }
+
+          octopus.bot.api.reactions.add({
+            timestamp: resp.ts,
+            channel: resp.channel,
+            name: 'white_check_mark',
+          }, function (err, message) {
+            if (err) {
+              bot.botkit.log('Failed to add COMPLETE emoji reaction.');
+            }
+          })
+        })
+      })
+    }); 
+  }
+
+  if (callback) {
+    callback(message)
+  }
+}
+
+function botreply(message) {
+  octopus.bot.reply(message, {
+    text: 'Unclaimed Tasks:', 
+  }, function(err, resp) {
+    console.log(err, resp);
+  })
+}
+
 // SHOW TASKS: Bot listens for 'show tasks' to retrieve and display tasks from firebase
 octopus.controller.hears(['%show', 'show', 'see tasks', 'show tasks', 'see my tasks', 'show my tasks', 'task list', 'show me my tasks', 'show me the tasks', 'show me tasks'], ['ambient', 'direct_message', 'direct_mention','mention'], function(bot, message) {
 
@@ -447,7 +500,7 @@ octopus.controller.hears(['%show', 'show', 'see tasks', 'show tasks', 'see my ta
         else {
           TaskItem.fields.push({
             label: 'TaskItem',
-            value: '*Task*: ' + task.body,
+            value: task.body,
             short: true,
           });
 
@@ -456,93 +509,17 @@ octopus.controller.hears(['%show', 'show', 'see tasks', 'show tasks', 'see my ta
         
       });
 
-      octopus.bot.reply(message, {
-        text: 'Claimed Tasks:', 
-      }, function(err, resp) {
-        console.log(err, resp);
-      })
-
-      for (var i = 0; i < claimed.length; i++) {
-        octopus.bot.reply(message, {
-          attachments: [claimed[i]],
-        }, function(err, resp) {
-          console.log(err, resp);
-
-          octopus.bot.api.reactions.add({
-            timestamp: resp.ts,
-            channel: resp.channel,
-            name: 'raised_hand',
-          }, function (err, message) {
-            if (err) {
-              bot.botkit.log('Failed to add CLAIM emoji reaction.');
-            }
-
-            octopus.bot.api.reactions.add({
-              timestamp: resp.ts,
-              channel: resp.channel,
-              name: 'x',
-            }, function (err, message) {
-              if (err) {
-                bot.botkit.log('Failed to add DELETE emoji reaction.');
-              }
-
-              octopus.bot.api.reactions.add({
-                timestamp: resp.ts,
-                channel: resp.channel,
-                name: 'white_check_mark',
-              }, function (err, message) {
-                if (err) {
-                  bot.botkit.log('Failed to add COMPLETE emoji reaction.');
-                }
-              })
-            })
-          })
-        }); //
+      function startUnclaimed() {
+         octopus.bot.reply(message, {
+          text: '*Unclaimed Tasks*',
+        }, loopTasks(unclaimed, message));
       }
 
       octopus.bot.reply(message, {
-        text: 'Unclaimed Tasks:', 
-      }, function(err, resp) {
-        console.log(err, resp);
-      })
+        text: '*Claimed Tasks:*', 
+      }, loopTasks(claimed, message));
 
-      for (var i = 0; i < unclaimed.length; i++) {
-        octopus.bot.reply(message, {
-          attachments: [unclaimed[i]],
-        }, function(err, resp) {
-          console.log(err, resp);
-
-          octopus.bot.api.reactions.add({
-            timestamp: resp.ts,
-            channel: resp.channel,
-            name: 'raised_hand',
-          }, function (err, message) {
-            if (err) {
-              bot.botkit.log('Failed to add CLAIM emoji reaction.');
-            }
-
-            octopus.bot.api.reactions.add({
-              timestamp: resp.ts,
-              channel: resp.channel,
-              name: 'x',
-            }, function (err, message) {
-              if (err) {
-                bot.botkit.log('Failed to add DELETE emoji reaction.');
-              }
-
-              octopus.bot.api.reactions.add({
-                timestamp: resp.ts,
-                channel: resp.channel,
-                name: 'white_check_mark',
-              }, function (err, message) {
-                if (err) {
-                  bot.botkit.log('Failed to add COMPLETE emoji reaction.');
-                }
-              })
-            })
-          })
-        });       
-      }
+      setTimeout(startUnclaimed, 1000);
     }
   })
 });
@@ -686,25 +663,27 @@ octopus.controller.hears('%assign', ['ambient', 'direct_message', 'direct_mentio
 // REACTION CONTROLLERS
 octopus.controller.on('reaction_added',function(bot, event) {
    
-   if (event.reaction == 'x') {
-      console.log("This is the remove command.");
-      // Get task ID and run remove function
-   }
+   if (event.user != event.item_user) {
+     if (event.reaction == 'x') {
+        console.log("This is the remove command.");
+        // Get task ID and run remove function
+     }
 
-   else if (event.reaction == 'hand') {
-      console.log("this is the claim command. This is the user: " + event.user + ". And this is the item: " + event.item);
-      bot.reply(event.item, "I love " + event.item);
-     // Get task ID and user ID and run claim function
+     else if (event.reaction == 'hand') {
+        console.log("this is the claim command. This is the user: " + event.user + ". And this is the item: " + event.item);
+        bot.reply(event.item, "@brandon claimed task whiskey79");
+       // Get task ID and user ID and run claim function
 
-   }
+     }
 
-   else if (event.reaction == 'white_check_mark') {
-    console.log("this is the complete command");
-     // Get task ID and run complete function
-   }
-   else {
-     // do nothing
-     bot.reply(event.item, ":" + event.reaction + ": back at you!");
+     else if (event.reaction == 'white_check_mark') {
+      console.log("this is the complete command");
+       // Get task ID and run complete function
+     }
+     else {
+       // do nothing
+       bot.reply(event.item, ":" + event.reaction + ": back at you!");
+     }
    }
 });
 
