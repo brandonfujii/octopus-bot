@@ -22,18 +22,6 @@ function getUserName(userID, callback) {
   });
 }
 
-function doesUserExist(userID, callback) {
-  slack.api("users.list", function(err, response) {
-    var memberdata = response.members;
-    for(var i = 0; i < memberdata.length; i++) {
-      if (memberdata[i].id == userID) {
-          return true;
-        }
-    }
-    return false;
-  });
-}
-
 
 // Task Object Constructor
 function Task(id, body, author, assignee, color, hex, channel, status) {
@@ -695,7 +683,6 @@ octopus.controller.hears('%assign', ['ambient', 'direct_message', 'direct_mentio
         if (task_id == task.id) {
 
           getUserName(assignedUserID, function(username) {
-            console.log("username is " + username);
             if(username == "usernameNotFound") {
               octopus.bot.reply(message, 'I couldn\'t find that user!');
               return;
@@ -712,10 +699,3 @@ octopus.controller.hears('%assign', ['ambient', 'direct_message', 'direct_mentio
     }
   })
 });
-
-
-// REACTION CONTROLLERS
-octopus.controller.on('reaction_added',function(bot, event) {
-  octopus.bot.reply(reaction.item, "I love " +  event.reaction)
-})
-
