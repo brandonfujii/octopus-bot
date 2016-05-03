@@ -660,7 +660,8 @@ octopus.controller.hears('%claim', ['ambient', 'direct_message', 'direct_mention
 octopus.controller.hears('%assign', ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
   var command = message.text.split(" ")[0];
   var task_id = getTaskBody(message.text);
-  var assignedUserID = message.text.split(" ")[3].substring(2, message.text.split(" ")[3].length-1);
+  var messageArraySize = message.text.split(" ").length-1;
+  var assignedUserID = message.text.split(" ")[messageArraySize].substring(2, message.text.split(" ")[messageArraySize].length-1);
 
   octopus.firebase_storage.teams.all(function(err, data) {
     if (err) {
