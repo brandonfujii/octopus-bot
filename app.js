@@ -656,6 +656,10 @@ octopus.controller.hears('%claim', ['ambient', 'direct_message', 'direct_mention
   })
 });
 
+// octopus.controller.hears(['assign a task', 'assign task'], ['ambient', 'direct_message', 'mention'], function() {
+
+// });
+
 // ASSIGN: Bot listens for 'assign' to have a task assigned to a specific user
 octopus.controller.hears('%assign', ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
   var command = message.text.split(" ")[0];
