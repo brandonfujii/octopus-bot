@@ -539,14 +539,26 @@ function showTasks(message) {
       });
 
       function startUnclaimed() {
-         octopus.bot.reply(message, {
-          text: '*Unclaimed Tasks*',
-        }, loopUnclaimedTasks(unclaimed, message));
+        if (unclaimed.length != 0) {
+           octopus.bot.reply(message, {
+            text: '*Unclaimed Tasks*',
+          }, loopUnclaimedTasks(unclaimed, message));
+        }
+        else {
+          octopus.bot.reply(message, "*Unclaimed Tasks:*");
+          octopus.bot.reply(message, "No unclaimed tasks.");
+        }
       }
 
-      octopus.bot.reply(message, {
-        text: '*Claimed Tasks:*',
-      }, loopClaimedTasks(claimed, message));
+      if (claimed.length != 0) {
+        octopus.bot.reply(message, {
+          text: '*Claimed Tasks:*',
+        }, loopClaimedTasks(claimed, message));
+      }
+      else {
+        octopus.bot.reply(message, "*Claimed Tasks:*");
+        octopus.bot.reply(message, "No claimed tasks.");
+      }
 
       setTimeout(startUnclaimed, 1000);
     }
