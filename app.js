@@ -452,9 +452,7 @@ function botreply(message) {
   })
 }
 
-// SHOW TASKS: Bot listens for 'show tasks' to retrieve and display tasks from firebase
-octopus.controller.hears(['%show', 'show', 'see tasks', 'show tasks', 'see my tasks', 'show my tasks', 'task list', 'show me my tasks', 'show me the tasks', 'show me tasks'], ['ambient', 'direct_message', 'direct_mention','mention'], function(bot, message) {
-
+function showTasks(message) {
   octopus.firebase_storage.teams.all(function(err, data) {
     if (err) {
       octopus.bot.reply(message, 'Sorry, I couldn\'t retrieve tasks!');
@@ -523,6 +521,10 @@ octopus.controller.hears(['%show', 'show', 'see tasks', 'show tasks', 'see my ta
       setTimeout(startUnclaimed, 1000);
     }
   })
+}
+// SHOW TASKS: Bot listens for 'show tasks' to retrieve and display tasks from firebase
+octopus.controller.hears(['%show', 'show', 'see tasks', 'show tasks', 'see my tasks', 'show my tasks', 'task list', 'show me my tasks', 'show me the tasks', 'show me tasks'], ['ambient', 'direct_message', 'direct_mention','mention'], function(bot, message) {
+  showTasks(message);
 });
 
 
@@ -705,6 +707,7 @@ octopus.controller.on('reaction_added', function(bot, event) {
                     // DELETE function here
                     octopus.firebase_storage.teams.del(taskid);
                     octopus.bot.reply(event.item, 'Task ' + taskid + ' removed!'); 
+                    // showTasks(event.item);
                     exists = true;
                   }
                 });
@@ -739,6 +742,7 @@ octopus.controller.on('reaction_added', function(bot, event) {
                     getUserName(event.user, function(username) {
                       octopus.firebase_storage.teams.updateAssignee(taskid, username);
                       octopus.bot.reply(event.item, username + " has claimed task " + task.id);
+                      // showTasks(event.item);
                     })
                     exists = true;
                   }
@@ -772,7 +776,8 @@ octopus.controller.on('reaction_added', function(bot, event) {
                   if (taskid == task.id) {
                     // DELETE function here
                     octopus.firebase_storage.teams.del(taskid);
-                    getUserName(event.user, function(username) { bot.reply(event.item, "Task " + taskid + " has been claimed by " + username + "!")} ); 
+                    getUserName(event.user, function(username) { bot.reply(event.item, "Task " + taskid + " has been claimed by " + username + "!"); } ); 
+
                     exists = true;
                   }
                 });
