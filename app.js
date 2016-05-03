@@ -645,10 +645,79 @@ octopus.controller.hears('%claim', ['ambient', 'direct_message', 'direct_mention
     if (data) {
       data.map(function(task) {
         if (task_id == task.id) {
-          // PATCH function here
           getUserName(message.user, function(username) {
-            octopus.firebase_storage.teams.updateAssignee(task_id, username);
-            octopus.bot.reply(message, username + " has claimed task " + task.id);
+          	if(task.assignee==username) {
+          		octopus.bot.reply(message, 'Looks like you\'re already in charge of this task!');
+			    return;
+          	}
+          	else if(task.assignee) {
+			  octopus.bot.startConversation(message, function(err, convo) {
+			    if (!err) {
+			      convo.ask('Looks like ' + task.id + ' is already claimed by ' + task.assignee + '. Are you sure you want to claim this task?', function(response, convo) {
+			        [
+			            {
+			              pattern: 'ye',
+			              callback: function(response, convo) {
+			                convo.next();
+			              }
+			            },
+			            {
+			              pattern: 'no',
+			              callback: function(response, convo) {
+			                convo.stop();
+			              }
+			            },
+			            {
+			              default: true,
+			              callback: function(response, convo) {
+			                  convo.repeat();
+			                  convo.next();
+			              }
+			            }
+			          ];
+
+			          convo.next();
+			      }, {'key': 'taskid'});
+
+			      convo.on('end', function(convo) {
+			          if (convo.status == 'completed') {
+			              octopus.firebase_storage.teams.all(function(err, data) {
+			                if (err) {
+			                  octopus.bot.reply(message, 'Sorry, I couldn\'t access task database!');
+			                  return;
+			                }
+
+			                var exists = false;
+
+			                if (data) {
+			                  data.map(function(task) {
+			                    if (task_id == task.id) {
+			                      getUserName(message.user, function(username) {
+			                        octopus.firebase_storage.teams.updateAssignee(task_id, username);
+			                        octopus.bot.reply(message, username + " has claimed task " + task.id);
+			                      });
+			                      exists = true;
+			                    }
+			                  });
+
+			                  if (!exists) {
+			                    octopus.bot.reply(message, 'I couldn\'t find a task with that ID!');
+			                  }
+			                }
+			              });
+
+			          } else {
+			              // this happens if the conversation ended prematurely for some reason
+			              bot.reply(message, 'Okay, nevermind!');
+			          }
+			      });
+			    }
+			  });
+          	}
+          	else {
+	            octopus.firebase_storage.teams.updateAssignee(task_id, username);
+	            octopus.bot.reply(message, username + " has claimed task " + task.id);
+	        }
           })
           exists = true;
         }
