@@ -137,9 +137,6 @@ octopus.controller.hears('help', ['direct_message', 'direct_mention', 'mention']
     short: true,
   });
 
-
-
-
   attachments.push(addTaskHelp);
   attachments.push(showTasksHelp);
   attachments.push(removeTaskHelp);
@@ -399,8 +396,41 @@ octopus.controller.hears('%complete', ['ambient', 'direct_message', 'direct_ment
 
 });
 
+function loopClaimedTasks(arr, message, callback) {
+  for (var i = 0; i < arr.length; i++) {
+    octopus.bot.reply(message, {
+      attachments: [arr[i]],
+    }, function(err, resp) {
+      console.log(err, resp);
 
-function loopTasks(arr, message, callback) {
+      octopus.bot.api.reactions.add({
+        timestamp: resp.ts,
+        channel: resp.channel,
+        name: 'x',
+      }, function (err, message) {
+        if (err) {
+          bot.botkit.log('Failed to add DELETE emoji reaction.');
+        }
+
+        octopus.bot.api.reactions.add({
+          timestamp: resp.ts,
+          channel: resp.channel,
+          name: 'white_check_mark',
+        }, function (err, message) {
+          if (err) {
+            bot.botkit.log('Failed to add COMPLETE emoji reaction.');
+          }
+        })
+      })
+    }); 
+  }
+
+  if (callback) {
+    callback(message)
+  }
+}
+
+function loopUnclaimedTasks(arr, message, callback) {
   for (var i = 0; i < arr.length; i++) {
     octopus.bot.reply(message, {
       attachments: [arr[i]],
@@ -511,12 +541,12 @@ function showTasks(message) {
       function startUnclaimed() {
          octopus.bot.reply(message, {
           text: '*Unclaimed Tasks*',
-        }, loopTasks(unclaimed, message));
+        }, loopUnclaimedTasks(unclaimed, message));
       }
 
       octopus.bot.reply(message, {
         text: '*Claimed Tasks:*', 
-      }, loopTasks(claimed, message));
+      }, loopClaimedTasks(claimed, message));
 
       setTimeout(startUnclaimed, 1000);
     }
