@@ -550,6 +550,10 @@ function showTasks(message) {
 
       setTimeout(startUnclaimed, 1000);
     }
+
+    else {
+      octopus.bot.reply(message, "There are no tasks available.");
+    }
   })
 }
 // SHOW TASKS: Bot listens for 'show tasks' to retrieve and display tasks from firebase

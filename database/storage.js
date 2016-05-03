@@ -36,14 +36,20 @@ module.exports = function(config) {
 
 
     var all = function(firebaseRef) {
+
         return function(cb) {
             firebaseRef.once('value',
                 function(records) {
-                    var list = [];
-                    for (key of Object.keys(records.val())) {
-                        list.push(records.val()[key]);
+                    if (records.exists()) {
+                        var list = [];
+                        for (key of Object.keys(records.val())) {
+                            list.push(records.val()[key]);
+                        }
+                        cb(undefined, list);
                     }
-                    cb(undefined, list);
+                    else {
+                        cb(undefined, undefined);
+                    }
     
                 },
                 function(err) {
