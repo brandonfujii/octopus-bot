@@ -573,84 +573,8 @@ octopus.controller.hears(['%show', 'show', 'see tasks', 'show tasks', 'see my ta
   showTasks(message);
 });
 
-
-octopus.controller.hears(['claim a task', 'claim it', 'claim my task', 'claim that task'], ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
-  octopus.bot.startConversation(message, function(err, convo) {
-    if (!err) {
-      convo.ask('What\'s the task id of the task you want to claim?', function(response, convo) {
-        convo.ask('You want to claim task *' + response.text + '*?', [
-            {
-              pattern: 'ye',
-              callback: function(response, convo) {
-                convo.next();
-              }
-            },
-            {
-              pattern: 'no',
-              callback: function(response, convo) {
-                convo.stop();
-              }
-            },
-            {
-              default: true,
-              callback: function(response, convo) {
-                  convo.repeat();
-                  convo.next();
-              }
-            }
-          ]);
-
-          convo.next();
-      }, {'key': 'taskid'});
-
-      convo.on('end', function(convo) {
-          if (convo.status == 'completed') {
-            var task_id = convo.extractResponse('taskid');
-              octopus.firebase_storage.teams.all(function(err, data) {
-                if (err) {
-                  octopus.bot.reply(message, 'Sorry, I couldn\'t access task database!');
-                  return;
-                }
-
-                var exists = false;
-
-                if (data) {
-                  data.map(function(task) {
-                    if (task_id == task.id) {
-                      getUserName(message.user, function(username) {
-                        octopus.firebase_storage.teams.updateAssignee(task_id, username);
-                        octopus.bot.reply(message, username + " has claimed task " + task.id);
-                      });
-                      exists = true;
-                    }
-                  });
-
-                  if (!exists) {
-                    octopus.bot.reply(message, 'I couldn\'t find a task with that ID!');
-                  }
-                }
-              });
-
-          } else {
-              // this happens if the conversation ended prematurely for some reason
-              bot.reply(message, 'Okay, nevermind!');
-          }
-      });
-    }
-  });
-});
-
-// CLAIM: Bot listens for 'claim' to have the user claim a task
-octopus.controller.hears('%claim', ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
-  var command = message.text.split(" ")[0];
-  var task_id = getTaskBody(message.text);
-
-  //TODO: assign task to user
-  octopus.firebase_storage.teams.all(function(err, data) {
-    if (err) {
-      octopus.bot.reply(message, 'Sorry, I couldn\'t access task database!');
-      return;
-    }
+//handleClaim -- simplifies claim functions
+function handleClaim(data, err, bot, message, task_id) {
 
     var exists = false;
 
@@ -738,6 +662,86 @@ octopus.controller.hears('%claim', ['ambient', 'direct_message', 'direct_mention
         octopus.bot.reply(message, 'I couldn\'t find a task with that ID!');
       }
     }
+}
+
+octopus.controller.hears(['claim a task', 'claim it', 'claim my task', 'claim that task'], ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
+  octopus.bot.startConversation(message, function(err, convo) {
+    if (!err) {
+      convo.ask('What\'s the task id of the task you want to claim?', function(response, convo) {
+        convo.ask('You want to claim task *' + response.text + '*?', [
+            {
+              pattern: 'ye',
+              callback: function(response, convo) {
+                convo.next();
+              }
+            },
+            {
+              pattern: 'no',
+              callback: function(response, convo) {
+                convo.stop();
+              }
+            },
+            {
+              default: true,
+              callback: function(response, convo) {
+                  convo.repeat();
+                  convo.next();
+              }
+            }
+          ]);
+
+          convo.next();
+      }, {'key': 'taskid'});
+
+      convo.on('end', function(convo) {
+          if (convo.status == 'completed') {
+            var task_id = convo.extractResponse('taskid');
+              octopus.firebase_storage.teams.all(function(err, data) {
+                if (err) {
+                  octopus.bot.reply(message, 'Sorry, I couldn\'t access task database!');
+                  return;
+                }
+
+                var exists = false;
+
+                if (data) {
+                  data.map(function(task) {
+                    if (task_id == task.id) {
+                      getUserName(message.user, function(username) {
+                        octopus.firebase_storage.teams.updateAssignee(task_id, username);
+                        octopus.bot.reply(message, username + " has claimed task " + task.id);
+                      });
+                      exists = true;
+                    }
+                  });
+
+                  if (!exists) {
+                    octopus.bot.reply(message, 'I couldn\'t find a task with that ID!');
+                  }
+                }
+              });
+
+          } else {
+              // this happens if the conversation ended prematurely for some reason
+              bot.reply(message, 'Okay, nevermind!');
+          }
+      });
+    }
+  });
+});
+
+// CLAIM: Bot listens for 'claim' to have the user claim a task
+octopus.controller.hears('%claim', ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
+  var command = message.text.split(" ")[0];
+  var task_id = getTaskBody(message.text);
+
+
+  octopus.firebase_storage.teams.all(function(err, data) {
+    if (err) {
+      octopus.bot.reply(message, 'Sorry, I couldn\'t access task database!');
+      return;
+    }
+    handleClaim(data, err, bot, message, task_id);
   })
 });
 
