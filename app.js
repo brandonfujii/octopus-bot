@@ -14,6 +14,7 @@ slack = new Slack(process.env.SLACK_ACCESS_TOKEN);
 function getUserName(userID, callback) {
   slack.api("users.list", function(err, response) {
     var memberdata = response.members;
+    console.log(userID);
     for(var i = 0; i < memberdata.length; i++) {
       if (memberdata[i].id == userID) {
           return callback(memberdata[i].name);
@@ -56,7 +57,7 @@ function getChannel( str ) {
 }
 
 // HELP: Bot listens for 'help', then shows documentation for octopus
-octopus.controller.hears('help', ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
+octopus.controller.hears('help', ['direct_message', 'direct_mention', 'mention'], function(bot, message) {
   var attachments = [];
   var addTaskHelp = {
     title: 'Adding a task:',
@@ -154,7 +155,7 @@ octopus.controller.hears('help', ['ambient', 'direct_message', 'direct_mention',
   });
 });
 
-octopus.controller.hears('%clear', ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
+octopus.controller.hears('clear', ['direct_message', 'direct_mention', 'mention'], function(bot, message) {
   var command = message.text.split(" ")[0];
   var task_id = getTaskBody(message.text);
 
@@ -358,7 +359,7 @@ octopus.controller.hears('%remove', ['ambient', 'direct_message', 'direct_mentio
         if (task_id == task.id) {
           // DELETE function here
           octopus.firebase_storage.teams.del(task_id);
-          octopus.bot.reply(message, 'Task removed'); 
+          octopus.bot.reply(message, 'Task ' + task_id + ' removed'); 
           exists = true;
         }
       });
@@ -477,11 +478,11 @@ octopus.controller.hears(['%show', 'show', 'see tasks', 'show tasks', 'see my ta
             color: '#' + task.hex,
             fields: [],
             mrkdwn_in: ['text', 'pretext', 'fields'],
-          };
+        };
 
       if (task.assignee) {
 
-        TaskItem.fields.push({
+          TaskItem.fields.push({
             label: 'TaskItem',
             value: task.body,
             short: true,
@@ -659,26 +660,129 @@ octopus.controller.hears('%assign', ['ambient', 'direct_message', 'direct_mentio
   })
 });
 
+function getTaskID(channel_id, timestamp, callback) {
+  slack.api("channels.history", {
+      channel: channel_id,
+      latest: timestamp,
+      count: 1,
+      inclusive: 1
+    }, function(err, response) {
+      if (response.messages[0].attachments) {
+         return callback(parseTask(response.messages[0].attachments[0].title));
+      }
+      else {
+        return callback("NotATask");
+      }
+  });
+}
+
+function parseTask(title) {
+  return title.split(" ")[1];
+}
+
 
 // REACTION CONTROLLERS
-octopus.controller.on('reaction_added',function(bot, event) {
-   
-   if (event.user != event.item_user) {
-     if (event.reaction == 'x') {
-        console.log("This is the remove command.");
+octopus.controller.on('reaction_added', function(bot, event) {
+    if (event.user != event.item_user) {
+      if (event.reaction == 'x') {
         // Get task ID and run remove function
-     }
+        getTaskID(event.item.channel, event.item.ts, function(taskid) {
+          if (taskid == "NotATask") {
+            bot.reply(event.item, "The post you tried to claim is not a task");
+          }
+          else {
+            octopus.firebase_storage.teams.all(function(err, data) {
+              if (err) {
+                octopus.bot.reply(event.item, 'Sorry, I couldn\'t access task database!');
+                return;
+              }
+
+              var exists = false;
+
+              if (data) {
+                data.map(function(task) {
+                  if (taskid == task.id) {
+                    // DELETE function here
+                    octopus.firebase_storage.teams.del(taskid);
+                    octopus.bot.reply(event.item, 'Task ' + taskid + ' removed!'); 
+                    exists = true;
+                  }
+                });
+                if (!exists) {
+                  octopus.bot.reply(event.item, 'I couldn\'t find a task with that ID!');
+                }
+              }
+            })
+          }
+        });
+      }
 
      else if (event.reaction == 'hand') {
-        console.log("this is the claim command. This is the user: " + event.user + ". And this is the item: " + event.item);
-        bot.reply(event.item, "@brandon claimed task whiskey79");
        // Get task ID and user ID and run claim function
+        getTaskID(event.item.channel, event.item.ts, function(taskid) {
+          if (taskid == "NotATask") {
+            bot.reply(event.item, "The post you tried to claim is not a task");
+          }
+          else {
+            octopus.firebase_storage.teams.all(function(err, data) {
+              if (err) {
+                octopus.bot.reply(event.item, 'Sorry, I couldn\'t access task database!');
+                return;
+              }
 
+              var exists = false;
+
+              if (data) {
+                data.map(function(task) {
+                  if (taskid == task.id) {
+                    // PATCH function here
+                    getUserName(event.user, function(username) {
+                      octopus.firebase_storage.teams.updateAssignee(taskid, username);
+                      octopus.bot.reply(event.item, username + " has claimed task " + task.id);
+                    })
+                    exists = true;
+                  }
+                });
+                if (!exists) {
+                  octopus.bot.reply(event.item, 'I couldn\'t find a task with that ID!');
+                }
+              }
+            })
+          }
+        });
      }
 
      else if (event.reaction == 'white_check_mark') {
-      console.log("this is the complete command");
        // Get task ID and run complete function
+       getTaskID(event.item.channel, event.item.ts, function(taskid) {
+          if (taskid == "NotATask") {
+            bot.reply(event.item, "The post you tried to claim is not a task");
+          }
+          else {
+            octopus.firebase_storage.teams.all(function(err, data) {
+              if (err) {
+                octopus.bot.reply(event.item, 'Sorry, I couldn\'t access task database!');
+                return;
+              }
+
+              var exists = false;
+
+              if (data) {
+                data.map(function(task) {
+                  if (taskid == task.id) {
+                    // DELETE function here
+                    octopus.firebase_storage.teams.del(taskid);
+                    getUserName(event.user, function(username) { bot.reply(event.item, "Task " + taskid + " has been claimed by " + username + "!")} ); 
+                    exists = true;
+                  }
+                });
+                if (!exists) {
+                  octopus.bot.reply(event.item, 'I couldn\'t find a task with that ID!');
+                }
+              }
+            })
+          }
+        });
      }
      else {
        // do nothing
