@@ -589,8 +589,7 @@ function handleClaim(data, err, bot, message, task_id) {
           	else if(task.assignee) {
 			  octopus.bot.startConversation(message, function(err, convo) {
 			    if (!err) {
-			      convo.ask('Looks like ' + task.id + ' is already claimed by ' + task.assignee + '. Are you sure you want to claim this task?', function(response, convo) {
-			        [
+			      convo.ask('Looks like ' + task.id + ' is already claimed by ' + task.assignee + '. Are you sure you want to claim this task?', [
 			            {
 			              pattern: 'ye',
 			              callback: function(response, convo) {
@@ -610,10 +609,7 @@ function handleClaim(data, err, bot, message, task_id) {
 			                  convo.next();
 			              }
 			            }
-			          ];
-
-			          convo.next();
-			      }, {'key': 'taskid'});
+			          ]);
 
 			      convo.on('end', function(convo) {
 			          if (convo.status == 'completed') {
@@ -705,19 +701,7 @@ octopus.controller.hears(['claim a task', 'claim it', 'claim my task', 'claim th
                 var exists = false;
 
                 if (data) {
-                  data.map(function(task) {
-                    if (task_id == task.id) {
-                      getUserName(message.user, function(username) {
-                        octopus.firebase_storage.teams.updateAssignee(task_id, username);
-                        octopus.bot.reply(message, username + " has claimed task " + task.id);
-                      });
-                      exists = true;
-                    }
-                  });
-
-                  if (!exists) {
-                    octopus.bot.reply(message, 'I couldn\'t find a task with that ID!');
-                  }
+                	handleClaim(data, err, bot, message, task_id);
                 }
               });
 
