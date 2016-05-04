@@ -569,7 +569,7 @@ function showTasks(message) {
   })
 }
 // SHOW TASKS: Bot listens for 'show tasks' to retrieve and display tasks from firebase
-octopus.controller.hears(['%show', 'show', 'see tasks', 'show tasks', 'see my tasks', 'show my tasks', 'task list', 'show me my tasks', 'show me the tasks', 'show me tasks'], ['ambient', 'direct_message', 'direct_mention','mention'], function(bot, message) {
+octopus.controller.hears(['%show', 'see tasks', 'show tasks', 'see my tasks', 'show my tasks', 'task list', 'show me my tasks', 'show me the tasks', 'show me tasks'], ['ambient', 'direct_message', 'direct_mention','mention'], function(bot, message) {
   showTasks(message);
 });
 
@@ -977,7 +977,7 @@ octopus.controller.on('reaction_added', function(bot, event) {
                   if (taskid == task.id) {
                     // DELETE function here
                     octopus.firebase_storage.teams.del(taskid);
-                    getUserName(event.user, function(username) { bot.reply(event.item, "Task " + taskid + " has been claimed by " + username + "!"); } );
+                    getUserName(event.user, function(username) { bot.reply(event.item, "Task " + taskid + " has been completed by " + username + "!"); } );
 
                     exists = true;
                   }
