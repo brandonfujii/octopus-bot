@@ -474,6 +474,24 @@ function loopUnclaimedTasks(arr, message, callback) {
   }
 }
 
+function addAddTaskEmoji(message) {
+  octopus.bot.reply(message, {
+    text: 'add a task!:',
+  }, function(err, resp) {
+    console.log(err, resp);
+
+    octopus.bot.api.reactions.add({
+      timestamp: resp.ts,
+      channel: resp.channel,
+      name: 'heavy_plus_sign',
+    }, function (err, resp) {
+      if (err) {
+        bot.botkit.log('Failed to add ADD emoji reaction.');
+      }
+    })
+  });
+}
+
 function botreply(message) {
   octopus.bot.reply(message, {
     text: 'Unclaimed Tasks:',
@@ -523,7 +541,6 @@ function showTasks(message) {
           });
 
           claimed.push(TaskItem);
-
         }
 
         else {
@@ -990,6 +1007,57 @@ octopus.controller.on('reaction_added', function(bot, event) {
           }
         });
      }
+     
+     else if (event.reaction == 'heavy_plus_sign') {
+      convo.ask('What do you want to add?', function(response, convo) {
+        convo.ask('You want to add *' + response.text + '*?', [
+            {
+              pattern: 'ye',
+              callback: function(response, convo) {
+                convo.next();
+              }
+            },
+            {
+              pattern: 'no',
+              callback: function(response, convo) {
+                convo.stop();
+              }
+            },
+            {
+              default: true,
+              callback: function(response, convo) {
+                  convo.repeat();
+                  convo.next();
+              }
+            }
+          ]);
+
+          convo.next();
+      }, {'key': 'taskbody'});
+
+      convo.on('end', function(convo) {
+          if (convo.status == 'completed') {
+            var body = convo.extractResponse('taskbody');
+            var task_id = uniquify.checkDBForExistingID();
+            var task = new Task(task_id, body, message.user, null, null, null, null, null);
+
+              octopus.firebase_storage.teams.save(task, function(err) {
+                if (err) {
+                  octopus.bot.reply(message, 'Sorry, I couldn\'t add your task!');
+                }
+                else {
+                  octopus.bot.reply(message, 'Nice! You\'ve added a task called \"' + task.body + '\" with the id, _' + task.id + '_');
+                }
+
+              });
+
+          } else {
+              // this happens if the conversation ended prematurely for some reason
+              bot.reply(message, 'Okay, nevermind!');
+          }
+      });
+    }
+
      else {
        // do nothing
        bot.reply(event.item, ":" + event.reaction + ": back at you!");
