@@ -1,6 +1,15 @@
 // Firebase database for bots
 
 var Firebase = require('firebase');
+var Slack = require('slack-node');
+var slack = new Slack(process.env.SLACK_ACCESS_TOKEN);
+
+function getTeamUrl(callback) {
+  slack.api("team.info", function(err, response) {
+    var team_url = response.team.domain;
+    callback(team_url);
+  });
+};
 
 module.exports = function(config) {
 
@@ -9,7 +18,10 @@ module.exports = function(config) {
             '"https://botkit-example.firebaseio.com/"');
 
     var rootRef = new Firebase(config.firebase_uri);
-    var teamsRef = rootRef.child('teams');
+    var teamsRef = rootRef.child(getTeamUrl(function(team_url) {
+        return team_url;
+    }));
+    // var teamsRef = rootRef.child('teams');
     var usersRef = rootRef.child('users');
     var channelsRef = rootRef.child('channels');
 
