@@ -28,8 +28,7 @@ module.exports = function(config) {
             '"https://botkit-example.firebaseio.com/"');
 
     var rootRef = new Firebase(config.firebase_uri);
-    var teamsRef = rootRef.child(team);
-    // var teamsRef = rootRef.child('teams');
+    var teamsRef = rootRef.child('teams');
     var usersRef = rootRef.child('users');
     var channelsRef = rootRef.child('channels');
 
