@@ -48,7 +48,7 @@ octopus.controller.hears(['remove a task', 'remove task', 'remove my task', 'rem
           data.map(function(task) {
             if (task_id == task.id) {
               // DELETE function here
-              octopus.firebase_storage.teams.del(task_id);
+              octopus.firebase_storage.teams.del(task.uuid);
               octopus.bot.reply(message, 'Okay! Task ' + task_id + ' removed!');
               exists = true;
             }
@@ -88,7 +88,7 @@ octopus.controller.hears('%remove', ['ambient', 'direct_message', 'direct_mentio
       data.map(function(task) {
         if (task_id == task.id) {
           // DELETE function here
-          octopus.firebase_storage.teams.del(task_id);
+          octopus.firebase_storage.teams.del(task.uuid);
           octopus.bot.reply(message, 'Okay, task ' + task_id + ' removed!');
           exists = true;
         }

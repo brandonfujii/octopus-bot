@@ -48,7 +48,7 @@ module.exports = function(config) {
     var save = function(firebaseRef) {
         return function(data, cb) {
             var firebase_update = {};
-            firebase_update[data.id] = data;
+            firebase_update[data.uuid] = data;
             firebaseRef.update(firebase_update, cb);
         };
     };

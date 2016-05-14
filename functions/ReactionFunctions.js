@@ -25,7 +25,7 @@ octopus.controller.on('reaction_added', function(bot, event) {
                 data.map(function(task) {
                   if (taskid == task.id) {
                     // DELETE function here
-                    octopus.firebase_storage.teams.del(taskid);
+                    octopus.firebase_storage.teams.del(task.uuid);
                     octopus.bot.reply(event.item, 'Task ' + taskid + ' removed!');
                     // showTasks(event.item);
                     exists = true;
@@ -60,7 +60,7 @@ octopus.controller.on('reaction_added', function(bot, event) {
                   if (taskid == task.id) {
                     // PATCH function here
                     User.getUserName(event.user, function(username) {
-                      octopus.firebase_storage.teams.updateAssignee(taskid, username);
+                      octopus.firebase_storage.teams.updateAssignee(task.uuid, username);
                       octopus.bot.reply(event.item, username + " has claimed task " + task.id);
                       // showTasks(event.item);
                     })
@@ -95,7 +95,7 @@ octopus.controller.on('reaction_added', function(bot, event) {
                 data.map(function(task) {
                   if (taskid == task.id) {
                     // DELETE function here
-                    octopus.firebase_storage.teams.del(taskid);
+                    octopus.firebase_storage.teams.del(task.uuid);
                     User.getUserName(event.user, function(username) { bot.reply(event.item, "Task " + taskid + " has been completed by " + username + "!"); } );
 
                     exists = true;

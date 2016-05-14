@@ -36,7 +36,7 @@ octopus.controller.hears(['add a task', 'add task', 'add meeting', 'add to tasks
           if (convo.status == 'completed') {
             var body = convo.extractResponse('taskbody');
             var task_id = uniquify.checkDBForExistingID();
-            var task = new Task.TaskItem(task_id, body, message.user, null, null, null, null, null);
+            var task = new Task.TaskItem(Date.now(), task_id, body, message.user, null, null, null, null, null);
 
               octopus.firebase_storage.teams.save(task, function(err) {
                 if (err) {
@@ -64,7 +64,7 @@ octopus.controller.hears('%add', ['ambient', 'direct_message', 'direct_mention' 
     var command = message.text.split(" ")[0];
     var body = Task.getTaskBody(message.text);
     var task_id = uniquify.checkDBForExistingID();
-    var task = new Task.TaskItem(task_id, body, message.user, null, null, null, null, null);
+    var task = new Task.TaskItem(Date.now(), task_id, body, message.user, null, null, null, null, null);
 
     octopus.firebase_storage.teams.save(task, function(err) {
       if (err) {

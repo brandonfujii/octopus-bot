@@ -49,7 +49,7 @@ octopus.controller.hears(['complete a task', 'complete task', 'complete my task'
           data.map(function(task) {
             if (task_id == task.id) {
               // DELETE function here
-              octopus.firebase_storage.teams.del(task_id);
+              octopus.firebase_storage.teams.del(task.uuid);
               User.getUserName(task.author, function(author) {
                 octopus.bot.reply(message, 'Okay! Task ' + task_id + ' was completed by ' + author + '!');
               });
@@ -90,7 +90,7 @@ octopus.controller.hears('%complete', ['ambient', 'direct_message', 'direct_ment
       data.map(function(task) {
         if (task_id == task.id) {
           // DELETE function here
-          octopus.firebase_storage.teams.del(task_id);
+          octopus.firebase_storage.teams.del(task.uuid);
           User.getUserName(task.author, function(author) {
             octopus.bot.reply(message, 'Okay! Task ' + task_id + ' was completed by ' + author + '!');
           });

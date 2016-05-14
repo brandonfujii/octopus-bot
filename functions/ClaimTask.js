@@ -3,7 +3,8 @@ var uniquify = require('../codify');
 var Task = require('../schemas/Task');
 var User = require('../schemas/User');
 
-// handleClaim 
+
+/* handleClaim */
 function handleClaim(data, err, bot, message, task_id) {
 
     var exists = false;
@@ -55,7 +56,7 @@ function handleClaim(data, err, bot, message, task_id) {
                         data.map(function(task) {
                           if (task_id == task.id) {
                             User.getUserName(message.user, function(username) {
-                              octopus.firebase_storage.teams.updateAssignee(task_id, username);
+                              octopus.firebase_storage.teams.updateAssignee(task.uuid, username);
                               octopus.bot.reply(message, username + " has claimed task " + task.id);
                             });
                             exists = true;
@@ -77,7 +78,7 @@ function handleClaim(data, err, bot, message, task_id) {
         });
             }
             else {
-              octopus.firebase_storage.teams.updateAssignee(task_id, username);
+              octopus.firebase_storage.teams.updateAssignee(task.uuid, username);
               octopus.bot.reply(message, username + " has claimed task " + task.id);
           }
           })

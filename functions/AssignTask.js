@@ -80,7 +80,7 @@ octopus.controller.hears(['assign a task', 'assign task', 'assign my task', 'ass
                         octopus.bot.reply(message, 'I couldn\'t find that user!');
                         return;
                       }
-                      octopus.firebase_storage.teams.updateAssignee(task_id, username);
+                      octopus.firebase_storage.teams.updateAssignee(task.uuid, username);
                       octopus.bot.reply(message, task.id + " has been assigned to @" + username);
                     })
                     exists = true;
@@ -126,7 +126,7 @@ octopus.controller.hears('%assign', ['ambient', 'direct_message', 'direct_mentio
               octopus.bot.reply(message, 'I couldn\'t find that user!');
               return;
             }
-            octopus.firebase_storage.teams.updateAssignee(task_id, username);
+            octopus.firebase_storage.teams.updateAssignee(task.uuid, username);
             octopus.bot.reply(message, task.id + " has been assigned to @" + username);
           })
           exists = true;
