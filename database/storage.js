@@ -8,56 +8,26 @@ var slack = new Slack(process.env.SLACK_ACCESS_TOKEN);
 function getTeamUrl(callback) {
     slack.api("team.info", function(err, response) {
         var team_url = response.team.domain;
-        callback(team_url);
-    })
-}
-
-var url_questionmark;
-
-function get_team_url() {
-	return new Promise(function(resolve, reject) {
-		slack.api("team.info", function(err, response) {
-			var team_url = response.team.domain;
-			var url_questionmark = team_url;
-
-			if (!err) {
-				console.log(team_url);
-				resolve(team_url);
-			}
-			else {
-				console.log("error in promise but here is: " + team_url);
-				reject(Error("could not get team_url from promise"));
-			}
-		})
-	})
-}
-
-get_team_url().then(function(response) {
-	console.log("success in getting promise", response);
-}, function(error) {
-	console.log("failed to get promise", error);
-});
-
-//get_team_url();
-console.log(url_questionmark);
+        return callback(team_url);
     });
-};
-
-module.exports = function(config) {
-
+}
+function main(config, teamURL){
     if (!config && !config.firebase_uri)
         throw new Error('Need to provide firebase address. This should look something like ' +
             '"https://botkit-example.firebaseio.com/"');
 
     var rootRef = new Firebase(config.firebase_uri);
     // var teamRootRef = rootRef.child(
-			// get_team_url().then(function(response) {
-					// console.log("success in getting promise", response);
-				// }, function(error) {
-					// console.log("failed to get promise", error);
-				// })
-			// );
-    var teamsRef = rootRef.child('teams');
+            // get_team_url().then(function(response) {
+                    // console.log("success in getting promise", response);
+                // }, function(error) {
+                    // console.log("failed to get promise", error);
+                // })
+            // );
+    console.log("rootref" + rootRef);
+    var teamsRef = rootRef.child(teamURL);
+    console.log("teamsRef is: " + teamsRef);
+    //var teamsRef = rootRef.child('teams');
     var usersRef = rootRef.child('users');
     var channelsRef = rootRef.child('channels');
 
@@ -144,5 +114,10 @@ module.exports = function(config) {
     };
 
     return storage;
+};
 
+module.exports = function(config) {
+    getTeamUrl(function(teamURL) {
+        main(config, teamURL);
+    });
 };
