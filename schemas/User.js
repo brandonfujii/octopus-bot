@@ -13,5 +13,7 @@ function getUserName(userID, callback) {
 
 
 module.exports = {
+
   getUserName: getUserName
+  
 }

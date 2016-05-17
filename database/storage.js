@@ -14,13 +14,6 @@ function getTeamUrl(callback) {
     });
 };
 
-function myCallback(result) {
-    return result;
-}
-
-getTeamUrl(myCallback);
-
-
 module.exports = function(config) {
 
     if (!config && !config.firebase_uri)

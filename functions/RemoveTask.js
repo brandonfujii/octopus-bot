@@ -72,7 +72,7 @@ octopus.controller.hears(['remove a task', 'remove task', 'remove my task', 'rem
 
 /* Remove a task through command %remove (this is a task id) */
 
-octopus.controller.hears('%remove', ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
+octopus.controller.hears('remove', ['direct_message', 'direct_mention', 'mention'], function(bot, message) {
   var command = message.text.split(" ")[0];
   var task_id = Task.getTaskBody(message.text);
 

@@ -74,7 +74,7 @@ octopus.controller.hears(['complete a task', 'complete task', 'complete my task'
 });
 
 // Complete a task through command %complete (this is a task id)
-octopus.controller.hears('%complete', ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
+octopus.controller.hears('complete', ['direct_message', 'direct_mention', 'mention'], function(bot, message) {
   var command = message.text.split(" ")[0];
   var task_id = Task.getTaskBody(message.text);
 
