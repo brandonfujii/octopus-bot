@@ -1,21 +1,19 @@
 {
-  "name": "witbot",
+  "name": "Slacktopus",
   "version": "1.0.0",
-  "description": "",
+  "description": "A slackbot for task management",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node app.js"
   },
-  "author": "",
+  "author": "Brandon Fujii",
   "license": "MIT",
   "dependencies": {
     "async": "^2.0.0-rc.3",
     "botkit": "0.0.15",
     "dotenv": "^2.0.0",
-    "express-session": "^1.13.0",
     "firebase": "^2.4.2",
-    "node-wit": "^2.0.0",
     "slack-node": "^0.2.0"
   }
 }

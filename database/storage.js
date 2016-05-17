@@ -40,6 +40,8 @@ get_team_url().then(function(response) {
 
 //get_team_url();
 console.log(url_questionmark);
+    });
+};
 
 module.exports = function(config) {
 
@@ -56,7 +58,6 @@ module.exports = function(config) {
 				// })
 			// );
     var teamsRef = rootRef.child('teams');
-    // var teamsRef = rootRef.child('teams');
     var usersRef = rootRef.child('users');
     var channelsRef = rootRef.child('channels');
 
@@ -76,7 +77,7 @@ module.exports = function(config) {
     var save = function(firebaseRef) {
         return function(data, cb) {
             var firebase_update = {};
-            firebase_update[data.id] = data;
+            firebase_update[data.uuid] = data;
             firebaseRef.update(firebase_update, cb);
         };
     };

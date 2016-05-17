@@ -3,7 +3,8 @@ var uniquify = require('../codify');
 var Task = require('../schemas/Task');
 var User = require('../schemas/User');
 
-// handleClaim 
+
+/* handleClaim */
 function handleClaim(data, err, bot, message, task_id) {
 
     var exists = false;
@@ -55,7 +56,7 @@ function handleClaim(data, err, bot, message, task_id) {
                         data.map(function(task) {
                           if (task_id == task.id) {
                             User.getUserName(message.user, function(username) {
-                              octopus.firebase_storage.teams.updateAssignee(task_id, username);
+                              octopus.firebase_storage.teams.updateAssignee(task.uuid, username);
                               octopus.bot.reply(message, username + " has claimed task " + task.id);
                             });
                             exists = true;
@@ -77,7 +78,7 @@ function handleClaim(data, err, bot, message, task_id) {
         });
             }
             else {
-              octopus.firebase_storage.teams.updateAssignee(task_id, username);
+              octopus.firebase_storage.teams.updateAssignee(task.uuid, username);
               octopus.bot.reply(message, username + " has claimed task " + task.id);
           }
           })
@@ -147,7 +148,7 @@ octopus.controller.hears(['claim a task', 'claim it', 'claim my task', 'claim th
 });
 
 
-octopus.controller.hears('%claim', ['ambient', 'direct_message', 'direct_mention', 'mention'], function(bot, message) {
+octopus.controller.hears('claim', ['direct_message', 'direct_mention', 'mention'], function(bot, message) {
   var command = message.text.split(" ")[0];
   var task_id = Task.getTaskBody(message.text);
 

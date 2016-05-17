@@ -1,5 +1,6 @@
 // Task Object Constructor
-function TaskItem(id, body, author, assignee, color, hex, channel, status) {
+function TaskItem(uuid, id, body, author, assignee, color, hex, channel, status) {
+  this.uuid = uuid;
   this.id = id;
   this.body = body;
   this.author = author;

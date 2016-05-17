@@ -12,7 +12,7 @@ octopus.controller.hears('clear', ['direct_message', 'direct_mention', 'mention'
 
     if (data) {
       data.map(function(task) {
-          octopus.firebase_storage.teams.del(task.id);
+          octopus.firebase_storage.teams.del(task.uuid);
       });
     }
     
