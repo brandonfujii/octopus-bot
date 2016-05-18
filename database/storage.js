@@ -6,14 +6,6 @@ var async = require('async');
 var slack = new Slack(process.env.SLACK_ACCESS_TOKEN);
 
 
-
-function getTeamUrl(callback) {
-    slack.api("team.info", function(err, response) {
-        var team_url = response.team.domain;
-        callback(team_url);
-    });
-};
-
 module.exports = function(config) {
 
     if (!config && !config.firebase_uri)

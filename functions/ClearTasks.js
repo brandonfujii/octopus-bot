@@ -15,7 +15,6 @@ octopus.controller.hears('clear', ['direct_message', 'direct_mention', 'mention'
           octopus.firebase_storage.teams.del(task.uuid);
       });
     }
-    
     octopus.bot.reply(message, 'All tasks cleared!');
   })
 });
