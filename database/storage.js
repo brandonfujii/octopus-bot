@@ -11,19 +11,31 @@ function getTeamUrl(callback) {
         return callback(team_url);
     });
 }
+
+function getTeamUrl(callback) ...
+
+... if (localstorage.getItem("slacktopus:slack-team-url")) {
+		callback(teamUrl)
+	} else {
+		// go get the team url with an API request
+		callback(teamUrl)
+	}
+
+getTeamUrl(function (teamUrl) {
+	// .. da a bunch of stuff
+	getTeamInfo(teamUrl)
+	getFirebaseRefFor(teamUrl)
+
+})
+
+getTeamUrl(main)
+
 function main(config, teamURL){
     if (!config && !config.firebase_uri)
         throw new Error('Need to provide firebase address. This should look something like ' +
             '"https://botkit-example.firebaseio.com/"');
 
     var rootRef = new Firebase(config.firebase_uri);
-    // var teamRootRef = rootRef.child(
-            // get_team_url().then(function(response) {
-                    // console.log("success in getting promise", response);
-                // }, function(error) {
-                    // console.log("failed to get promise", error);
-                // })
-            // );
     console.log("rootref" + rootRef);
     var teamsRef = rootRef.child(teamURL);
     console.log("teamsRef is: " + teamsRef);
@@ -121,3 +133,4 @@ module.exports = function(config) {
         main(config, teamURL);
     });
 };
+

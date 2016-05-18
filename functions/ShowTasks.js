@@ -170,5 +170,7 @@ function showTasks(message) {
 
 // Bot listens for 'show tasks' to retrieve and display tasks from firebase
 octopus.controller.hears(['show', 'see tasks', 'show tasks', 'see my tasks', 'show my tasks', 'task list', 'show me my tasks', 'show me the tasks', 'show me tasks'], ['direct_message', 'direct_mention','mention'], function(bot, message) {
+  console.log(octopus.firebase_storage);
+  console.log(octopus.firebase_storage.teams);
   showTasks(message);
 });
