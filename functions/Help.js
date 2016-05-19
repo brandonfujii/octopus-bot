@@ -47,37 +47,37 @@ octopus.controller.hears('help', ['direct_message', 'direct_mention', 'mention']
 
   addTaskHelp.fields.push({
     label: 'AddTask',
-    value: '`%add (your_task)`',
+    value: '`@slacktopus: add (your task)`',
     short: true,
   });
 
   showTasksHelp.fields.push({
     label: 'ShowTask',
-    value: '`%show`',
+    value: '`@slacktopus: show tasks`',
     short: true,
   });
 
   removeTaskHelp.fields.push({
     label: 'RemoveTask',
-    value: '`%remove (task_id)`',
+    value: '`@slacktopus: remove (task id)`',
     short: true,
   });
 
   completeTaskHelp.fields.push({
     label: 'CompleteTask',
-    value: '`%complete (task_id)`',
+    value: '`@slacktopus: complete (task id)`',
     short: true,
   });
 
   claimTaskHelp.fields.push({
     label: 'ClaimTask',
-    value: '`%claim (task_id)`',
+    value: '`@slacktopus: claim (task id)`',
     short: true,
   });
 
   assignTaskHelp.fields.push({
     label: 'AssignTask',
-    value: '`%assign (task_id) to @person`',
+    value: '`@slacktopus: assign (task id) to @person`',
     short: true,
   });
 

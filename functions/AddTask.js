@@ -61,6 +61,7 @@ octopus.controller.hears(['add a task', 'add task', 'add meeting', 'add to tasks
 Example: %add (this is my task) */
 octopus.controller.hears('add', ['direct_message', 'direct_mention' ,'mention'], function(bot, message) {
 
+    
     var command = message.text.split(" ")[0];
     var body = Task.getTaskBody(message.text);
     var task_id = uniquify.checkDBForExistingID();
