@@ -6,7 +6,7 @@ octopus.controller.hears('clear', ['direct_message', 'direct_mention', 'mention'
 
   octopus.firebase_storage.teams.all(function(err, data) {
     if (err) {
-      octopus.bot.reply(message, 'Sorry, I couldn\'t access task database!');
+      octopus.bot.reply(message, 'Sorry, I couldn\'t access your tasks!');
       return;
     }
 

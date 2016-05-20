@@ -10,13 +10,13 @@ octopus.controller.hears(['remove a task', 'remove task', 'remove my task', 'rem
       convo.ask('Okay, what\'s the id of the task you want to remove?', function(response, convo) {
         convo.ask('You want to remove task *' + response.text + '*?', [
             {
-              pattern: 'ye',
+              pattern: bot.utterances.yes,
               callback: function(response, convo) {
                 convo.next();
               }
             },
             {
-              pattern: 'no',
+              pattern: bot.utterances.no,
               callback: function(response, convo) {
                 convo.stop();
               }
@@ -94,7 +94,7 @@ octopus.controller.hears('remove', ['direct_message', 'direct_mention', 'mention
         }
       });
       if (!exists) {
-        octopus.bot.reply(message, 'I couldn\'t find a task with that ID!');
+        octopus.bot.reply(message, 'I couldn\'t find a task with that ID! Type `@slacktopus: help` to view all the things you can do!');
       }
     }
   })

@@ -1,3 +1,4 @@
+var octopus = require('../botconfig');
 
 // Task Object Constructor
 function TaskItem(uuid, id, body, author, assignee, color, hex, channel, status) {
@@ -20,8 +21,7 @@ function getTaskBody( str ) {
     return str.match(/\(([^)]+)\)/)[1];
   }
   else {
-    console.log("Make sure it's in correct format");
-    return;
+    return null;
   }
 }
 

@@ -11,6 +11,7 @@ slack = new Slack(process.env.SLACK_ACCESS_TOKEN);
 
 // Functions 
 var AddTask = require('./functions/AddTask');
+var UnclaimTask = require('./functions/UnclaimTask');
 var ClaimTask = require('./functions/ClaimTask');
 var AssignTask = require('./functions/AssignTask');
 var ShowTasks = require('./functions/ShowTasks');
@@ -19,3 +20,4 @@ var CompleteTask = require('./functions/CompleteTask');
 var Help = require('./functions/Help');
 var Reactions = require('./functions/ReactionFunctions');
 var ClearTasks = require('./functions/ClearTasks');
+var Discourse = require('./functions/Discourse');

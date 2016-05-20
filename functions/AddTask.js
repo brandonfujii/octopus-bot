@@ -9,13 +9,13 @@ octopus.controller.hears(['add a task', 'add task', 'add meeting', 'add to tasks
       convo.ask('What do you want to add?', function(response, convo) {
         convo.ask('You want to add *' + response.text + '*?', [
             {
-              pattern: 'ye',
+              pattern: bot.utterances.yes,
               callback: function(response, convo) {
                 convo.next();
               }
             },
             {
-              pattern: 'no',
+              pattern: bot.utterances.no,
               callback: function(response, convo) {
                 convo.stop();
               }
@@ -72,8 +72,12 @@ octopus.controller.hears('add', ['direct_message', 'direct_mention' ,'mention'],
         octopus.bot.reply(message, 'Sorry, I couldn\'t add your task!');
       }
       else {
-
-        octopus.bot.reply(message, 'Nice! You\'ve added a task called \"' + task.body + '\" with the id, _' + task.id + '_');
+        if (body) {
+          octopus.bot.reply(message, 'Nice! You\'ve added a task called \"' + task.body + '\" with the id, _' + task.id + '_');
+        }
+        else {
+          octopus.bot.reply(message, "Sorry, I was unable to create your task. Type `@slacktopus: help` to view all the things you can do!");
+        }
       }
     })
 

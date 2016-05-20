@@ -22,13 +22,13 @@ function handleClaim(data, err, bot, message, task_id) {
           if (!err) {
             convo.ask('Looks like ' + task.id + ' is already claimed by ' + task.assignee + '. Are you sure you want to claim this task?', [
                   {
-                    pattern: 'ye',
+                    pattern: bot.utterances.yes,
                     callback: function(response, convo) {
                       convo.next();
                     }
                   },
                   {
-                    pattern: 'no',
+                    pattern: bot.utterances.no,
                     callback: function(response, convo) {
                       convo.stop();
                     }
@@ -152,13 +152,19 @@ octopus.controller.hears('claim', ['direct_message', 'direct_mention', 'mention'
   var command = message.text.split(" ")[0];
   var task_id = Task.getTaskBody(message.text);
 
-
-  octopus.firebase_storage.teams.all(function(err, data) {
-    if (err) {
-      octopus.bot.reply(message, 'Sorry, I couldn\'t access task database!');
-      return;
-    }
-    handleClaim(data, err, bot, message, task_id);
-  })
+  if (command == 'claim') {
+    octopus.firebase_storage.teams.all(function(err, data) {
+      if (err) {
+        octopus.bot.reply(message, 'Sorry, I couldn\'t access task database!');
+        return;
+      }
+      if (task_id) {
+        handleClaim(data, err, bot, message, task_id);
+      }
+      else {
+        octopus.bot.reply(message, "I couldn't find that task ID you specified! Type `@slacktopus: help` to view all the things you can do lol!");
+      }
+    })
+  }
 });
 

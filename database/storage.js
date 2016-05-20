@@ -71,7 +71,12 @@ module.exports = function(config) {
 
     var updateAssignee = function(firebaseRef) {
         return function(id, user) {
-            firebaseRef.child(id).update({ assignee: user, status: 'Claimed' });
+            if (user) {
+                firebaseRef.child(id).update({ assignee: user, status: 'Claimed' });
+            }
+            else {
+                firebaseRef.child(id).update({ assignee: null, status: null });
+            }
         };
     };
 

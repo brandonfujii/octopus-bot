@@ -11,13 +11,13 @@ octopus.controller.hears(['complete a task', 'complete task', 'complete my task'
       convo.ask('Okay, what\'s the id of the task you completed?', function(response, convo) {
         convo.ask('You completed task *' + response.text + '*?', [
             {
-              pattern: 'ye',
+              pattern: bot.utterances.yes,
               callback: function(response, convo) {
                 convo.next();
               }
             },
             {
-              pattern: 'no',
+              pattern: bot.utterances.no,
               callback: function(response, convo) {
                 convo.stop();
               }
@@ -98,7 +98,7 @@ octopus.controller.hears('complete', ['direct_message', 'direct_mention', 'menti
         }
       });
       if (!exists) {
-        octopus.bot.reply(message, 'I couldn\'t find a task with that ID!');
+        octopus.bot.reply(message, 'I couldn\'t find a task with that ID! Type `@slacktopus: help` to view all the things you can do!');
       }
     }
   })

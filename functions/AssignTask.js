@@ -10,13 +10,13 @@ octopus.controller.hears(['assign a task', 'assign task', 'assign my task', 'ass
       convo.ask('What\'s the task id of the task you want to assign?', function(response, convo) {
         convo.ask('You want to assign task *' + response.text + '*?', [
             {
-              pattern: 'ye',
+              pattern: bot.utterances.yes,
               callback: function(response, convo) {
                 convo.next();
               }
             },
             {
-              pattern: 'no',
+              pattern: bot.utterances.no,
               callback: function(response, convo) {
                 convo.stop();
               }
@@ -133,7 +133,7 @@ octopus.controller.hears('assign', ['direct_message', 'direct_mention', 'mention
         }
       });
       if (!exists) {
-        octopus.bot.reply(message, 'I couldn\'t find a task with that ID!');
+        octopus.bot.reply(message, 'I couldn\'t find a task with that ID! Type `@slacktopus: help` to view all the things you can do!');
       }
     }
   })
