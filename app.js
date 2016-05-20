@@ -9,6 +9,9 @@ var uniquify = require('./codify');
 var Slack = require('slack-node');
 slack = new Slack(process.env.SLACK_ACCESS_TOKEN);
 
+var cache = require('./database/cache');
+cache.cacheTeamUrl();
+
 // Functions 
 var AddTask = require('./functions/AddTask');
 var ClaimTask = require('./functions/ClaimTask');

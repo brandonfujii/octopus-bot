@@ -4,7 +4,11 @@ var Firebase = require('firebase');
 var Slack = require('slack-node');
 var async = require('async');
 var slack = new Slack(process.env.SLACK_ACCESS_TOKEN);
+var cache = require('./cache');
 
+function wait() {
+    return;
+}
 
 module.exports = function(config) {
 
@@ -13,7 +17,28 @@ module.exports = function(config) {
             '"https://botkit-example.firebaseio.com/"');
 
     var rootRef = new Firebase(config.firebase_uri);
-    var teamsRef = rootRef.child('teams');
+    var teamURL;
+    if (teamURL == null) {
+        console.log("teamURL detected as " + teamURL);
+        console.log("setting placeholder");
+        var teamsRef = rootRef.child('placeholder');
+    } else {
+        console.log("teamURL detected as " + teamURL);
+        var teamsRef = rootRef.child(teamURL);
+    }
+    // if (teamURL == null) {
+    //     var teamURL = cache.getTeamUrl();
+    //     //wait
+    //     setTimeout(wait, 3000);
+    //     console.log("teamURL detected as " + teamURL);
+    //     var teamsRef = rootRef.child(teamURL);
+    // }
+    // else {
+    //     console.log("teamURL detected as " + teamURL);
+    //     var teamsRef = rootRef.child(teamURL);
+    // }
+
+    var teamsRef = rootRef.child('placeholder');
     var usersRef = rootRef.child('users');
     var channelsRef = rootRef.child('channels');
 
