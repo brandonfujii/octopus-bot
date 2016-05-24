@@ -128,8 +128,20 @@ octopus.controller.hears('assign', ['direct_message', 'direct_mention', 'mention
             }
             octopus.firebase_storage.teams.updateAssignee(task.uuid, username);
             octopus.bot.reply(message, task.id + " has been assigned to @" + username);
+
           })
           exists = true;
+          User.getUserName(message.user, function(username) {
+            if(username == "usernameNotFound") {
+              octopus.bot.reply(message, 'I couldn\'t notify the user you have assigned the task to!');
+              return;
+            }
+            message.user = assignedUserID;
+            octopus.bot.startPrivateConversation(message, function(err, dm) {
+              dm.say("Hey! " + username + " has assigned you, " + "*" + task.body + "*, with the task ID, _" + task.id + "_");
+              dm.say("Type `show tasks` to see your teams' tasks or `unclaim (" + task.id + ")` to remove yourself from this task.");
+            });
+          });
         }
       });
       if (!exists) {
