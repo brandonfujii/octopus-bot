@@ -31,7 +31,7 @@ This allows the program to know which bot to use and where to store the created 
 Go to the channel that you've invited your bot to. For each command you'll be mentioning your bot (@yourbot):
 #### Adding a task
 ```bash
-%add (this is a new task)
+@slacktopus: add (this is a new task)
 ```
 Notice the use of parenthesis.
 
@@ -45,7 +45,7 @@ add task
 
 #### Viewing your team's tasks
 ```bash
-%show
+@slacktopus: show tasks
 ```
 or something like:
 ```bash
@@ -54,7 +54,7 @@ show me my tasks
 
 #### Removing a task
 ```bash
-%remove (task_id)
+@slacktopus: remove (task_id)
 ```
 or something like:
 ```bash
@@ -63,9 +63,38 @@ I wanna remove a task
 
 ### Completing a task
 ```bash
-%complete (task_id)
+@slacktopus: complete (task_id)
 ```
 or something like:
 ```bash
 complete a task
 ```
+
+### Claiming a task
+```bash
+@slacktopus: claim (task_id)
+```
+or something like:
+```bash
+I wanna claim a task
+```
+
+### Unclaiming a task
+```bash
+@slacktopus: unclaim (task_id)
+```
+
+### Assigning a task to someone
+```bash
+@slacktopus: assign (task_id) to @username
+```
+or something like:
+```bash
+I wanna assign a task to someone
+```
+
+### Seeking help or documentation? 
+```bash
+@slacktopus: help
+```
+

@@ -1,4 +1,7 @@
 // BotConfig.js: Main botkit configuration/initialization file
+var Slack = require('slack-node');
+var slack = new Slack(process.env.SLACK_ACCESS_TOKEN);
+
 // use .env file
 require('dotenv').config()
 var Botkit = require('botkit');

@@ -4,7 +4,7 @@ var Firebase = require('firebase');
 var Slack = require('slack-node');
 var async = require('async');
 var slack = new Slack(process.env.SLACK_ACCESS_TOKEN);
-// var cache = require('memory-cache');
+var cache = require('memory-cache');
 
 // slack.api("team.info", function(err, response) {
 //     if (err) {

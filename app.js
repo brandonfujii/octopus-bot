@@ -3,6 +3,11 @@
 
 // define database and botkit controller
 var octopus = require('./botconfig');
+var botloader = require('./botloader');
+
+botloader.With({
+	slack: 'slackvalue'
+});
 // get unique ID functions
 var uniquify = require('./codify');
 // Slack package to get data from Slack
